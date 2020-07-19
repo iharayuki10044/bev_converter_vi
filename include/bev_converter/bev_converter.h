@@ -31,6 +31,7 @@ class BEVConverter
         pcl::PointCloud<PointI>::Ptr pc_downsampling(pcl::PointCloud<PointI>::Ptr);
         void formatting(void);
         void initialization(void);
+        void converter(void);
 
 	private:
 		bool pc_callback_flag = false;
@@ -56,7 +57,7 @@ class BEVConverter
         CloudIPtr pcl_input_pc{new CloudI()};
         CloudIPtr pcl_filtered_pc {new CloudI()};
 
-        Eigen::Vector3f zero_vector = Eigen::Vector3f::Zero();
+        // Eigen::Vector3f zero_vector = Eigen::Vector3f::Zero();
 
 };
 
