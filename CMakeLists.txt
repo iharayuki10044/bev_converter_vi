@@ -148,7 +148,7 @@ add_definitions(
 
 ## Declare a C++ library
 add_library(libbev_converter
-  src/libbev_converter.cpp
+  src/bev_converter.cpp
 )
 
 ## Add cmake target dependencies of the library
