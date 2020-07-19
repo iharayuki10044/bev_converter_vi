@@ -53,6 +53,7 @@ class BEVConverter
 		ros::Publisher bev_grid_publisher;
 		
         nav_msgs::OccupancyGrid bev_grid;
+        geometry_msgs::Odometry odom;
 
         CloudIPtr pcl_input_pc{new CloudI()};
         CloudIPtr pcl_filtered_pc {new CloudI()};
