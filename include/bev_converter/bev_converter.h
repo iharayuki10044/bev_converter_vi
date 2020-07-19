@@ -4,7 +4,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <nav_msgs/OccupancyGrid.h>
-#include <nav_msgs/Odometry.h>
+#include <geometry_msgs/Odometry.h>
 
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
