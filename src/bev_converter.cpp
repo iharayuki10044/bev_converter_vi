@@ -16,11 +16,11 @@ BEVConverter::BEVConverter(void)
 
 void BEVConverter::execution(void)
 {
-    formatting();
+    formatter();
 
 	ros::Rate r(Hz);
 	while(ros::ok()){
-        initialization();
+        initializer();
 
 		if(pc_callback_flag && odom_callback_flag){
             converter();
