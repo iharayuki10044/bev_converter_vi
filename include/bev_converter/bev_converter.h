@@ -29,8 +29,8 @@ class BEVConverter
 		void pc_callback(const sensor_msgs::PointCloud2ConstPtr&);
 		void odom_callback(const geometry_msgs::PoseConstPtr&);
         pcl::PointCloud<PointI>::Ptr pc_downsampling(pcl::PointCloud<PointI>::Ptr);
-        void formatting(void);
-        void initialization(void);
+        void formatter(void);
+        void initializer(void);
         void converter(void);
 
 	private:
