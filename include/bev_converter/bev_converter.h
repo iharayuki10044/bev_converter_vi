@@ -50,6 +50,7 @@ class BEVConverter
         ros::NodeHandle nh;
         
 		ros::Subscriber pc_subscriber;
+		ros::Subscriber odom_subscriber;
 		ros::Publisher bev_grid_publisher;
 		
         nav_msgs::OccupancyGrid bev_grid;
