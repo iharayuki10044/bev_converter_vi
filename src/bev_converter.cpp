@@ -99,7 +99,9 @@ void BEVConverter::formatter(void)
     bev_grid.info.width = WIDTH;
     bev_grid.info.height = HEIGHT;
     bev_grid.info.origin = odom.pose.pose;
-    bev_grid.data.resize(WIDTH * HEIGHT);
+    bev_grid.info.origin.position.x = odom.pose.pose.position.x - 0.5 * WIDTH;
+    bev_grid.info.origin.position.y = odom.pose.pose.position.y - 0.5 * HEIGHT;
+    bev_grid.data.resize(GRID_NUM_X * GRID_NUM_Y);
 
     grid_size_x = WIDTH / GRID_NUM_X;
     grid_size_y = HEIGHT / GRID_NUM_Y;
@@ -120,8 +122,8 @@ void BEVConverter::converter(void)
     for(auto& pt : pcl_filtered_pc->points){
     // for(auto& pt : pcl_input_pc->points){
 
-        /* int ix = floor((pt.x + 0.5 * WIDTH) / grid_size_x); */
-        /* int iy = floor((pt.y + 0.5 * HEIGHT) / grid_size_y); */
+        int ix = floor((pt.x + 0.5 * WIDTH) / grid_size_x);
+        int iy = floor((pt.y + 0.5 * HEIGHT) / grid_size_y);
         /* int index = ix + iy * (WIDTH / grid_size_x); */
 
         /* int ix = floor(pt.x / grid_size_x + 0.5 * WIDTH); */
@@ -130,13 +132,12 @@ void BEVConverter::converter(void)
         /* int ix = (int)(pt.x / grid_size_x + 0.5 * WIDTH); */
         /* int iy = (int)(pt.y / grid_size_y + 0.5 * HEIGHT); */
 		
-
-        int ix = (int)(pt.x / grid_size_x);
-        int iy = (int)(pt.y / grid_size_y);
+        /* int ix = (int)(pt.x / grid_size_x); */
+        /* int iy = (int)(pt.y / grid_size_y); */
 		int index = ix + iy * HEIGHT;
 		/* std::cout << "[ix, iy] = [" << ix << ", " << iy << "]" << std::endl; */
 		/* bev_grid.data[index] = (int)Occupied; */
-        if(index < WIDTH * HEIGHT && ix >= 0 && iy >= 0){
+        if((0 <= ix && ix < GRID_NUM_X) && (0 <= iy && iy < GRID_NUM_Y)){
 			std::cout << "[ix, iy] = [" << ix << ", " << iy << "]" << std::endl;
             bev_grid.data[index] = (int)Occupied;
         }
