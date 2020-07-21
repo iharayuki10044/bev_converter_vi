@@ -18,23 +18,23 @@ BEVConverter::BEVConverter(void)
 
 void BEVConverter::execution(void)
 {
-	std::cout << "formatter" << std::endl;
+	/* std::cout << "formatter" << std::endl; */
     formatter();
 
 	ros::Rate r((int)Hz);
 	while(ros::ok()){
-		std::cout << "initializer" << std::endl;
+		/* std::cout << "initializer" << std::endl; */
         initializer();
 
 		if(pc_callback_flag && odom_callback_flag){
-			std::cout << "converter" << std::endl;
+			/* std::cout << "converter" << std::endl; */
             converter();
 
     		bev_grid.header.stamp = ros::Time::now();
     		bev_grid.info.map_load_time = ros::Time::now();
     		bev_grid_publisher.publish(bev_grid);
             
-			std::cout << bev_grid << std::endl;
+			//std::cout << bev_grid << std::endl;
 
 			pc_callback_flag = false;
             odom_callback_flag = false;
@@ -59,17 +59,32 @@ void BEVConverter::pc_callback(const sensor_msgs::PointCloud2ConstPtr &msg)
 pcl::PointCloud<PointI>::Ptr BEVConverter::pc_downsampling(pcl::PointCloud<PointI>::Ptr pcl_input_pc_)
 {
     CloudIPtr pcl_filtered_pc_ {new CloudI()};
+    CloudIPtr pcl_filtered_pc__ {new CloudI()};
+    CloudIPtr pcl_filtered_pc___ {new CloudI()};
     pcl::VoxelGrid<pcl::PointXYZI> sor;
 
     sor.setInputCloud(pcl_input_pc_);
     sor.setLeafSize(grid_size_x, grid_size_y, grid_size_z);
     sor.filter(*pcl_filtered_pc_);
 
+	/* pcl::PassThrough<PointI> pass; */
+	/* pass.setInputCloud(pcl_filtered_pc_); */
+	/* pass.setFilterFieldName ("x"); */
+	/* pass.setFilterLimits(-0.5 * WIDTH, 0.5 * WIDTH); */
+	/* pass.setFilterLimitsNegative (true); */
+	/* pass.filter(*pcl_filtered_pc__); */
+	/* pass.setInputCloud(pcl_filtered_pc__); */
+	/* pass.setFilterFieldName ("y"); */
+	/* pass.setFilterLimits(-0.5 * HEIGHT, 0.5 * HEIGHT); */
+	/* pass.setFilterLimitsNegative (true); */
+	/* pass.filter(*pcl_filtered_pc___); */
+
+    // return pcl_filtered_pc___;
     return pcl_filtered_pc_;
 }
 
 
-void BEVConverter::odom_callback(const geometry_msgs::PoseConstPtr &msg)
+void BEVConverter::odom_callback(const nav_msgs::OdometryConstPtr &msg)
 {
     odom = *msg;
     odom_callback_flag = true;
@@ -83,7 +98,7 @@ void BEVConverter::formatter(void)
     bev_grid.info.resolution = (float)(WIDTH / GRID_NUM_X);
     bev_grid.info.width = WIDTH;
     bev_grid.info.height = HEIGHT;
-    bev_grid.info.origin = odom;
+    bev_grid.info.origin = odom.pose.pose;
     bev_grid.data.resize(WIDTH * HEIGHT);
 
     grid_size_x = WIDTH / GRID_NUM_X;
@@ -103,12 +118,29 @@ void BEVConverter::initializer(void)
 void BEVConverter::converter(void)
 {
     for(auto& pt : pcl_filtered_pc->points){
-        int ix = (int)((pt.x + 0.5 * WIDTH) / grid_size_x);
-        int iy = (int)((pt.y + 0.5 * HEIGHT) / grid_size_y);
-        int index = ix + iy * (WIDTH / grid_size_x);
-        if(index < WIDTH * HEIGHT){
+    // for(auto& pt : pcl_input_pc->points){
+
+        /* int ix = floor((pt.x + 0.5 * WIDTH) / grid_size_x); */
+        /* int iy = floor((pt.y + 0.5 * HEIGHT) / grid_size_y); */
+        /* int index = ix + iy * (WIDTH / grid_size_x); */
+
+        /* int ix = floor(pt.x / grid_size_x + 0.5 * WIDTH); */
+        /* int iy = floor(pt.y / grid_size_y + 0.5 * HEIGHT); */
+
+        /* int ix = (int)(pt.x / grid_size_x + 0.5 * WIDTH); */
+        /* int iy = (int)(pt.y / grid_size_y + 0.5 * HEIGHT); */
+		
+
+        int ix = (int)(pt.x / grid_size_x);
+        int iy = (int)(pt.y / grid_size_y);
+		int index = ix + iy * HEIGHT;
+		/* std::cout << "[ix, iy] = [" << ix << ", " << iy << "]" << std::endl; */
+		/* bev_grid.data[index] = (int)Occupied; */
+        if(index < WIDTH * HEIGHT && ix >= 0 && iy >= 0){
+			std::cout << "[ix, iy] = [" << ix << ", " << iy << "]" << std::endl;
             bev_grid.data[index] = (int)Occupied;
         }
+        // int index = iy + ix * WIDTH;
     }
 }
 

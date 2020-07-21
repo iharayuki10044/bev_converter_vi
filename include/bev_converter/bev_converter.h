@@ -4,11 +4,13 @@
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Pose.h>
 
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/passthrough.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl/point_cloud.h>
 
@@ -27,7 +29,7 @@ class BEVConverter
 
 		void execution(void);
 		void pc_callback(const sensor_msgs::PointCloud2ConstPtr&);
-		void odom_callback(const geometry_msgs::PoseConstPtr&);
+		void odom_callback(const nav_msgs::OdometryConstPtr&);
         pcl::PointCloud<PointI>::Ptr pc_downsampling(pcl::PointCloud<PointI>::Ptr);
         void formatter(void);
         void initializer(void);
@@ -54,7 +56,7 @@ class BEVConverter
 		ros::Publisher bev_grid_publisher;
 		
         nav_msgs::OccupancyGrid bev_grid;
-        geometry_msgs::Pose odom;
+        nav_msgs::Odometry odom;
 
         CloudIPtr pcl_input_pc{new CloudI()};
         CloudIPtr pcl_filtered_pc {new CloudI()};
