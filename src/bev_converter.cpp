@@ -96,8 +96,8 @@ void BEVConverter::formatter(void)
     bev_grid.header.seq = 0;
     bev_grid.header.frame_id = "velodyne";
     bev_grid.info.resolution = (float)(WIDTH / GRID_NUM_X);
-    bev_grid.info.width = WIDTH;
-    bev_grid.info.height = HEIGHT;
+    bev_grid.info.width = GRID_NUM_X;
+    bev_grid.info.height = GRID_NUM_Y;
     bev_grid.info.origin = odom.pose.pose;
     bev_grid.info.origin.position.x = odom.pose.pose.position.x - 0.5 * WIDTH;
     bev_grid.info.origin.position.y = odom.pose.pose.position.y - 0.5 * HEIGHT;
@@ -119,29 +119,15 @@ void BEVConverter::initializer(void)
 
 void BEVConverter::converter(void)
 {
-    for(auto& pt : pcl_filtered_pc->points){
-    // for(auto& pt : pcl_input_pc->points){
-
+    // for(auto& pt : pcl_filtered_pc->points){
+    for(auto& pt : pcl_input_pc->points){
         int ix = floor((pt.x + 0.5 * WIDTH) / grid_size_x);
         int iy = floor((pt.y + 0.5 * HEIGHT) / grid_size_y);
-        /* int index = ix + iy * (WIDTH / grid_size_x); */
-
-        /* int ix = floor(pt.x / grid_size_x + 0.5 * WIDTH); */
-        /* int iy = floor(pt.y / grid_size_y + 0.5 * HEIGHT); */
-
-        /* int ix = (int)(pt.x / grid_size_x + 0.5 * WIDTH); */
-        /* int iy = (int)(pt.y / grid_size_y + 0.5 * HEIGHT); */
-		
-        /* int ix = (int)(pt.x / grid_size_x); */
-        /* int iy = (int)(pt.y / grid_size_y); */
-		int index = ix + iy * HEIGHT;
-		/* std::cout << "[ix, iy] = [" << ix << ", " << iy << "]" << std::endl; */
-		/* bev_grid.data[index] = (int)Occupied; */
+        int index = ix + iy * (WIDTH / grid_size_x);
         if((0 <= ix && ix < GRID_NUM_X) && (0 <= iy && iy < GRID_NUM_Y)){
 			std::cout << "[ix, iy] = [" << ix << ", " << iy << "]" << std::endl;
             bev_grid.data[index] = (int)Occupied;
         }
-        // int index = iy + ix * WIDTH;
     }
 }
 
