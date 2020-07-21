@@ -26,6 +26,24 @@ void BEVConverter::execution(void)
 		/* std::cout << "initializer" << std::endl; */
         initializer();
 
+    	/* Eigen::Affine3d affine_transform; */
+		/* try{ */
+        /* 	tf::StampedTransform stamped_transform; */
+        /* 	listener.lookupTransform("/odom", "/velodyne", ros::Time(0), stamped_transform); */
+		/* 	Eigen::Translation<double, 3> t(stamped_transform.getOrigin().x(), stamped_transform.getOrigin().y(), stamped_transform.getOrigin().z()); */
+		/* 	Eigen::Quaterniond q(stamped_transform.getRotation().w(), stamped_transform.getRotation().x(), stamped_transform.getRotation().y(), stamped_transform.getRotation().z()); */
+		/* 	affine_transform = q * t; */
+		/* 	tf_listen_flag = true; */
+     	/* }    */
+     	/* catch (tf::TransformException ex){ */
+       	/* 	ROS_ERROR("%s",ex.what()); */
+       	/* 	ros::Duration(1.0).sleep(); */
+    	/* } */
+		/* if(pc_callback_flag && odom_callback_flag && tf_listen_flag){ */
+		/* 	#<{(| std::cout << "transform point cloud" << std::endl; |)}># */
+        /* 	pcl::transformPointCloud(*pcl_filtered_pc, *pcl_transformed_pc, affine_transform); */
+		/* } */
+
 		if(pc_callback_flag && odom_callback_flag){
 			/* std::cout << "converter" << std::endl; */
             converter();
@@ -35,10 +53,11 @@ void BEVConverter::execution(void)
     		bev_grid_publisher.publish(bev_grid);
             
 			//std::cout << bev_grid << std::endl;
-
-			pc_callback_flag = false;
-            odom_callback_flag = false;
 		}
+		tf_listen_flag = false;
+		pc_callback_flag = false;
+		odom_callback_flag = false;
+
 		r.sleep();
 		ros::spinOnce();
 	}
@@ -119,13 +138,14 @@ void BEVConverter::initializer(void)
 
 void BEVConverter::converter(void)
 {
-    // for(auto& pt : pcl_filtered_pc->points){
-    for(auto& pt : pcl_input_pc->points){
+    /* for(auto& pt : pcl_transformed_pc->points){ */
+    for(auto& pt : pcl_filtered_pc->points){
+    // for(auto& pt : pcl_input_pc->points){
         int ix = floor((pt.x + 0.5 * WIDTH) / grid_size_x);
         int iy = floor((pt.y + 0.5 * HEIGHT) / grid_size_y);
         int index = ix + iy * (WIDTH / grid_size_x);
         if((0 <= ix && ix < GRID_NUM_X) && (0 <= iy && iy < GRID_NUM_Y)){
-			std::cout << "[ix, iy] = [" << ix << ", " << iy << "]" << std::endl;
+			/* std::cout << "[ix, iy] = [" << ix << ", " << iy << "]" << std::endl; */
             bev_grid.data[index] = (int)Occupied;
         }
     }
