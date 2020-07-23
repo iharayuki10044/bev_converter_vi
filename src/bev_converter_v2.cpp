@@ -19,12 +19,14 @@ BEVConverter::BEVConverter(void)
 void BEVConverter::execution(void)
 {
 	/* std::cout << "formatter" << std::endl; */
-    if(odom_callback_flag){
-        formatter();
-    }
 
 	ros::Rate r((int)Hz);
 	while(ros::ok()){
+        if(!first_flag){
+            formatter();
+            first_flag = true;
+        }
+
 		/* std::cout << "initializer" << std::endl; */
         initializer();
 

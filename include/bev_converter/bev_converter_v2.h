@@ -41,6 +41,7 @@ class BEVConverter
         void occupancy_gridder(void);
 
 	private:
+		bool first_flag = false;
 		bool pc_callback_flag = false;
 		bool odom_callback_flag = false;
 		bool tf_listen_flag = false;
