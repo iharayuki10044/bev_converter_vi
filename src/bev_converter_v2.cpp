@@ -22,10 +22,6 @@ void BEVConverter::execution(void)
 
 	ros::Rate r((int)Hz);
 	while(ros::ok()){
-        if(!first_flag){
-            formatter();
-            first_flag = true;
-        }
 
 		/* std::cout << "initializer" << std::endl; */
         initializer();
@@ -49,6 +45,11 @@ void BEVConverter::execution(void)
 		/* } */
 
 		if(pc_callback_flag && odom_callback_flag){
+            if(!first_flag){
+                formatter();
+                first_flag = true;
+            }
+
             bev_rotator();
 
 			/* std::cout << "converter" << std::endl; */
