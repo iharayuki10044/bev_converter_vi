@@ -141,10 +141,10 @@ void BEVConverter::initializer(void)
 
 void BEVConverter::bev_rotator(void)
 {
-    bev_grid.info.irigin.orientation.x -= odom.pose.pose.orientation.x;
-    bev_grid.info.irigin.orientation.y -= odom.pose.pose.orientation.y;
-    bev_grid.info.irigin.orientation.z -= odom.pose.pose.orientation.z;
-    bev_grid.info.irigin.orientation.w -= odom.pose.pose.orientation.w;
+    bev_grid.info.origin.orientation.x -= odom.pose.pose.orientation.x;
+    bev_grid.info.origin.orientation.y -= odom.pose.pose.orientation.y;
+    bev_grid.info.origin.orientation.z -= odom.pose.pose.orientation.z;
+    bev_grid.info.origin.orientation.w -= odom.pose.pose.orientation.w;
 }
 
 
