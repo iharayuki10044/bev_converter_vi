@@ -148,7 +148,7 @@ void BEVConverter::bev_rotator(void)
     tf::Quaternion quat, quat_;
     geometry_msgs::Quaternion geometry_quat, geometry_quat_;
 
-    geometry_quat = odom.pose.pose;
+    geometry_quat = odom.pose.pose.orientation;
     quaternionMsgToTF(geometry_quat, quat);
     tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
 
