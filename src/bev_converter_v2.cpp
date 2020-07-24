@@ -127,8 +127,8 @@ void BEVConverter::formatter(void)
     bev_grid.info.origin = odom.pose.pose;
     bev_grid.info.origin.position.x = odom.pose.pose.position.x - 0.5 * WIDTH;
     // bev_grid.info.origin.position.x -= WIDTH;
-    bev_grid.info.origin.position.y = odom.pose.pose.position.y - 0.5 * HEIGHT;
-    // bev_grid.info.origin.position.y -= HEIGHT;
+    // bev_grid.info.origin.position.y = odom.pose.pose.position.y - 0.5 * HEIGHT;
+    bev_grid.info.origin.position.y -= HEIGHT;
     bev_grid.data.resize(GRID_NUM_X * GRID_NUM_Y);
 
     grid_size_x = WIDTH / GRID_NUM_X;
