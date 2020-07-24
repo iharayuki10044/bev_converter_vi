@@ -145,18 +145,20 @@ void BEVConverter::initializer(void)
 void BEVConverter::bev_rotator(void)
 {
     double roll, pitch, yaw;
-    tf::Quaternion quat;
-    quaternionMsgToTF(odom.pose.pose, quat);
+    tf::Quaternion quat, quat_;
+    geometry_msgs::Quaternion geometry_quat, geometry_quat_;
+
+    geometry_quat = odom.pose.pose;
+    quaternionMsgToTF(geometry_quat, quat);
     tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
 
-    tf::Quaternion quat=tf::createQuaternionFromRPY(-roll, -pitch, -yaw);
-    geometry_msgs::Quaternion geometry_quat;
-    quaternionTFToMsg(quat, geometry_quat);
+    tf::Quaternion quat_ = tf::createQuaternionFromRPY(-roll, -pitch, -yaw);
+    quaternionTFToMsg(quat_, geometry_quat_);
 
-    bev_grid.info.origin.orientation.x += geometry_quat.x;
-    bev_grid.info.origin.orientation.y += geometry_quat.y;
-    bev_grid.info.origin.orientation.z += geometry_quat.z;
-    bev_grid.info.origin.orientation.w += geometry_quat.w;
+    bev_grid.info.origin.orientation.x += geometry_quat_.x;
+    bev_grid.info.origin.orientation.y += geometry_quat_.y;
+    bev_grid.info.origin.orientation.z += geometry_quat_.z;
+    bev_grid.info.origin.orientation.w += geometry_quat_.w;
 }
 
 
