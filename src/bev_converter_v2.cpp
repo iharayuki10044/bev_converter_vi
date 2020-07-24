@@ -144,10 +144,19 @@ void BEVConverter::initializer(void)
 
 void BEVConverter::bev_rotator(void)
 {
-    bev_grid.info.origin.orientation.x -= odom.pose.pose.orientation.x;
-    bev_grid.info.origin.orientation.y -= odom.pose.pose.orientation.y;
-    bev_grid.info.origin.orientation.z -= odom.pose.pose.orientation.z;
-    bev_grid.info.origin.orientation.w -= odom.pose.pose.orientation.w;
+    double roll, pitch, yaw;
+    tf::Quaternion quat;
+    quaternionMsgToTF(odom.pose.pose, quat);
+    tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+
+    tf::Quaternion quat=tf::createQuaternionFromRPY(-roll, -pitch, -yaw);
+    geometry_msgs::Quaternion geometry_quat;
+    quaternionTFToMsg(quat, geometry_quat);
+
+    bev_grid.info.origin.orientation.x += geometry_quat.x;
+    bev_grid.info.origin.orientation.y += geometry_quat.y;
+    bev_grid.info.origin.orientation.z += geometry_quat.z;
+    bev_grid.info.origin.orientation.w += geometry_quat.w;
 }
 
 
