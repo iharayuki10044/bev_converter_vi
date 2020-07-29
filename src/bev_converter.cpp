@@ -139,8 +139,8 @@ void BEVConverter::initializer(void)
 void BEVConverter::converter(void)
 {
     /* for(auto& pt : pcl_transformed_pc->points){ */
-    for(auto& pt : pcl_filtered_pc->points){
-    // for(auto& pt : pcl_input_pc->points){
+    /* for(auto& pt : pcl_filtered_pc->points){ */
+    for(auto& pt : pcl_input_pc->points){
         int ix = floor((pt.x + 0.5 * WIDTH) / grid_size_x);
         int iy = floor((pt.y + 0.5 * HEIGHT) / grid_size_y);
         int index = ix + iy * (WIDTH / grid_size_x);
