@@ -12,7 +12,7 @@ BEVImageGenerator::BEVImageGenerator(void)
     nh.getParam("CATS_MOTION_PARAM", CATS_MOTION_PARAM);
 
     grid_subscriber = nh.subscribe("/bev/grid", 10, &BEVImageGenerator::grid_callback, this);
-    odom_subscriber = nh.subscribe("/odom", 10, &BEVImageGenerator::odom_callback, this);
+    odom_subscriber = nh.subscribe("/estimated_pose/pose", 10, &BEVImageGenerator::odom_callback, this);
     bev_image_publisher = nh.advertise<>("/bev/image", 10);
 }
 
@@ -27,30 +27,13 @@ void BEVImageGenerator::execution(void)
 		std::cout << "initializer" << std::endl;
         initializer();
 
-    	/* Eigen::Affine3d affine_transform; */
-		/* try{ */
-        /* 	tf::StampedTransform stamped_transform; */
-        /* 	listener.lookupTransform("/odom", "/velodyne", ros::Time(0), stamped_transform); */
-		/* 	Eigen::Translation<double, 3> t(stamped_transform.getOrigin().x(), stamped_transform.getOrigin().y(), stamped_transform.getOrigin().z()); */
-		/* 	Eigen::Quaterniond q(stamped_transform.getRotation().w(), stamped_transform.getRotation().x(), stamped_transform.getRotation().y(), stamped_transform.getRotation().z()); */
-		/* 	affine_transform = q * t; */
-		/* 	tf_listen_flag = true; */
-     	/* }    */
-     	/* catch (tf::TransformException ex){ */
-       	/* 	ROS_ERROR("%s",ex.what()); */
-       	/* 	ros::Duration(1.0).sleep(); */
-    	/* } */
-		/* if(pc_callback_flag && odom_callback_flag && tf_listen_flag){ */
-		/* 	#<{(| std::cout << "transform point cloud" << std::endl; |)}># */
-        /* 	pcl::transformPointCloud(*pcl_filtered_pc, *pcl_transformed_pc, affine_transform); */
-		/* } */
 
 		if(pc_callback_flag && odom_callback_flag){
 
+			first_flag = true;
+			grid_callback_flag = false;
+			odom_callback_flag = false;
 		}
-		tf_listen_flag = false;
-		grid_callback_flag = false;
-		odom_callback_flag = false;
 
 		r.sleep();
 		ros::spinOnce();
@@ -58,7 +41,7 @@ void BEVImageGenerator::execution(void)
 }
 
 
-void BEVImageGenerator::pc_callback(const nav_msgs::OccupancyGridConstPtr &msg)
+void BEVImageGenerator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 {
     bev_grid = *msg;
     grid_callback_flag = true;
@@ -67,7 +50,56 @@ void BEVImageGenerator::pc_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 
 void BEVImageGenerator::odom_callback(const nav_msgs::OdometryConstPtr &msg)
 {
-    odom = *msg;
+	static MyOdom pre_my_odom;
+	static MyOdom now_my_odom;
+	tf::Quaternion quat;
+	geometry_msgs::Quaternion geometry_quat;
+    nav_msgs::Odometry odom;
+	double roll, pitch, yaw;
+
+	odom = *msg;
+
+	if(!first_flag){
+		geometry_quat.x = odom.pose.pose.orientation.x;
+		geometry_quat.y = odom.pose.pose.orientation.y;
+		geometry_quat.z = odom.pose.pose.orientation.z;
+		geometry_quat.w = odom.pose.pose.orientation.w;
+		quaternionMsgToTF(geometry_quat, quat);
+		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+
+		now_my_odom.x = odom.pose.pose.position.x;
+		now_my_odom.y = odom.pose.pose.position.y;
+		now_my_odom.z = odom.pose.pose.position.z;
+		now_my_odom.roll = roll;
+		now_my_odom.pitch = pitch;
+		now_my_odom.yaw = yaw;
+		pre_my_odom = now_my_odom;
+	}else{
+		pre_my_odom = now_my_odom;
+
+		geometry_quat.x = odom.pose.pose.orientation.x;
+		geometry_quat.y = odom.pose.pose.orientation.y;
+		geometry_quat.z = odom.pose.pose.orientation.z;
+		geometry_quat.w = odom.pose.pose.orientation.w;
+		quaternionMsgToTF(geometry_quat, quat);
+		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+
+		now_my_odom.x = odom.pose.pose.position.x;
+		now_my_odom.y = odom.pose.pose.position.y;
+		now_my_odom.z = odom.pose.pose.position.z;
+		now_my_odom.roll = roll;
+		now_my_odom.pitch = pitch;
+		now_my_odom.yaw = yaw;
+	}
+
+	d_my_odom.x = now_my_odom.x - pre_my_odom.x;
+	d_my_odom.y = now_my_odom.y - pre_my_odom.y;
+	d_my_odom.z = now_my_odom.z - pre_my_odom.z;
+	d_my_odom.roll = now_my_odom.roll - pre_my_odom.roll;
+	d_my_odom.pitch = now_my_odom.pitch - pre_my_odom.pitch;
+	d_my_odom.yaw = now_my_odom.yaw - pre_my_odom.yaw;
+
+
     odom_callback_flag = true;
 }
 
@@ -84,7 +116,14 @@ void BEVImageGenerator::formatter(void)
     robot.max_wheel_angular_velocyty = CATS_MOTION_PARAM["MAX_WHEEL_ANGULAR_VELOCITY"];
     robot.wheel_radius = CATS_MOTION_PARAM["WHEEL_RADIUS"];
     robot.tread = CATS_MOTION_PARAM["TREAD"];
-    cell_max_dynamics(robot);
+    cell_max_dynamics(robot_param);
+
+	src_uv.o.col = GRID_NUM_X / 2;
+	src_uv.o.row = GRID_NUM_Y / 2;
+	src_uv.x.col = GRID_NUM_X / 2 - 1;
+	src_uv.x.row = GRID_NUM_Y / 2;
+	src_uv.y.col = GRID_NUM_X / 2;
+	src_uv.y.row = GRID_NUM_Y / 2 - 1;
 }
 
 
@@ -93,16 +132,31 @@ void BEVImageGenerator::initializer(void)
 }
 
 
-CellDynamics BEVImageGenerator::cell_dynamics_calculator(Dynamics robot_dynamics)
+CellDynamics BEVImageGenerator::cell_dynamics_calculator(Dynamicsi &robot_dynamics)
 {
     CellDynamics cell_dynamics;
-    cell_dynamics.ix_vel = 
+    cell_dynamics.vel.col = 
 
     return cell_dynamics;
 }
 
 
-nav_msgs::OccupancyGrid BEVImageGenerator::grid_transformer(nav_msgs::OccupancyGrid& grid)
+UnitVectorOXY BEVImageGenerator::unit_vector_registrator(void)
+{
+	if(!first_flag){
+		dst_uv.o.col = GRID_NUM_X / 2;
+		dst_uv.o.row = GRID_NUM_Y / 2;
+		dst_uv.x.col = GRID_NUM_X / 2 - 1;
+		dst_uv.x.row = GRID_NUM_Y / 2;
+		dst_uv.y.col = GRID_NUM_X / 2;
+		dst_uv.y.row = GRID_NUM_Y / 2 - 1;
+	}else{
+	}
+	
+}
+
+
+void BEVImageGenerator::image_transformer(nav_msgs::OccupancyGrid &grid)
 {
 }
 
