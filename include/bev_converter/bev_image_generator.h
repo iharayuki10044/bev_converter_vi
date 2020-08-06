@@ -11,13 +11,7 @@
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
 
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl/filters/voxel_grid.h>
-#include <pcl/filters/passthrough.h>
-#include <pcl_ros/point_cloud.h>
-#include <pcl_ros/transforms.h>
+#include <opencv2/opencv.hpp>
 
 #include "Eigen/Core"
 #include "Eigen/Dense"
@@ -45,18 +39,14 @@ class BEVImageGenerator
 			double pitch;
 			double yaw;
 		};
-		typedef struct CRIJXY{
-			int col; //i↓  ...   ↑ x
-			int row; //j→  ... y← o
-		};
-        typedef struct CellDynamics{
-			RCXY vel;
-            Eigen::Matrix2f rotate;  
-        };
+        typedef struct OXY{
+			Eigen::Vector2i o;
+			Eigen::Vector2i x;
+			Eigen::Vector2i y;
+        }
 		typedef struct UnitVectorOXY{
-			CRIJXY o;
-			CRIJXY x;
-			CRIJXY y;
+            OXY src;
+            OXY dst;
 		};
 
 		void execution(void);
@@ -64,8 +54,8 @@ class BEVImageGenerator
 		void odom_callback(const nav_msgs::OdometryConstPtr&);
         void formatter(void);
         void initializer(void);
-        CellDynamics cell_dynamics_calculator(Dynamics&);
-		UnitVectorOXY unit_vector_registrator(nav_msgs::Odometry&);
+        Motion cell_motion_calculator(MyOdom&);
+		UnitVectorOXY unit_vector_registrator(bool);
         void image_transformer(nav_msgs::OccupancyGrid&);
 
 	private:
@@ -76,9 +66,12 @@ class BEVImageGenerator
 		bool odom_callback_flag = false;
 		bool tf_listen_flag = false;
 
-		constexpr static float Occupied = 1.0, Free = 0.0, Unknown = 0.5;
+		constexpr float Occupied = 1.0, Free = 0.0, Unknown = 0.5;
+        constexpr int uv_o = 0, int uv_x = 1, int uv_y = 2; // uv : unit vector
+		constexpr int col; //i↓  ...   ↑x
+		constexpr int row; //j→  ... y←o
 
-		double Hz;
+		double Hz, dt;
 
         double WIDTH, HEIGHT; // x, y;
         int GRID_NUM_X, GRID_NUM_Y;
@@ -95,12 +88,12 @@ class BEVImageGenerator
 
         // Eigen::Vector3f zero_vector = Eigen::Vector3f::Zero();
 
+        cv::Mat input_grid_img;
+
         Dynamics robot_param;
+        MyOdom max_motion;
 		MyOdom d_my_odom;
-        CellDynamics cell_max_dynamics;
-        CellDynamics cell_odom;
-		UnitVectorOXY src_uv;
-		UnitVectorOXY dst_uv;
+		UnitVectorOXY unit_vector;
 
 
 
