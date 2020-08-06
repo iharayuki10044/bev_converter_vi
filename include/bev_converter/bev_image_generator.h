@@ -9,6 +9,7 @@
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
+#include <tf/transform_broadcaster.h>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -22,26 +23,55 @@
 #include "Eigen/Dense"
 #include "Eigen/LU"
 
-typedef pcl::PointXYZI PointI;
-typedef pcl::PointCloud<PointI> CloudI;
-typedef pcl::PointCloud<PointI>::Ptr CloudIPtr;
 
 class BEVImageGenerator
 {
 	public:
 		BEVImageGenerator(void);
 
+        typedef struct Dynamics{
+            float max_acceleration;
+            float max_yawrate;
+            float max_d_yawrate;
+            float max_wheel_angular_velocyty;
+            float wheel_radius;
+            float tread;
+        };
+		typedef struct MyOdom{
+			double x;
+			double y;
+			double z;
+			double roll;
+			double pitch;
+			double yaw;
+		};
+		typedef struct CRIJXY{
+			int col; //i↓  ...   ↑ x
+			int row; //j→  ... y← o
+		};
+        typedef struct CellDynamics{
+			RCXY vel;
+            Eigen::Matrix2f rotate;  
+        };
+		typedef struct UnitVectorOXY{
+			CRIJXY o;
+			CRIJXY x;
+			CRIJXY y;
+		};
+
 		void execution(void);
 		void grid_callback(const nav_msgs::OccupancyGridConstPtr&);
 		void odom_callback(const nav_msgs::OdometryConstPtr&);
         void formatter(void);
         void initializer(void);
-        void grid_transformer(nav_msgs::OccupancyGrid&);
-        void cell_dynamics_calculator(void);
+        CellDynamics cell_dynamics_calculator(Dynamics&);
+		UnitVectorOXY unit_vector_registrator(nav_msgs::Odometry&);
+        void image_transformer(nav_msgs::OccupancyGrid&);
 
 	private:
         XmlRpc::XmlRpcValue CATS_MOTION_PARAM;
 
+		bool first_flag = false;
 		bool grid_callback_flag = false;
 		bool odom_callback_flag = false;
 		bool tf_listen_flag = false;
@@ -62,34 +92,16 @@ class BEVImageGenerator
 		ros::Publisher bev_image_publisher;
 		
         nav_msgs::OccupancyGrid bev_grid;
-        nav_msgs::Odometry odom;
-
-		tf::TransformListener listener;
-		tf::StampedTransform transform;
-
-        CloudIPtr pcl_input_pc{new CloudI()};
-        CloudIPtr pcl_filtered_pc {new CloudI()};
-        CloudIPtr pcl_transformed_pc {new CloudI()};
 
         // Eigen::Vector3f zero_vector = Eigen::Vector3f::Zero();
 
-        typedef struct Dynamics{
-            float max_acceleration;
-            float max_yawrate;
-            float max_d_yawrate;
-            float max_wheel_angular_velocyty;
-            float wheel_radius;
-            float tread;
-        };
-        Dynamics robot;
-
-        typedef struct CellDynamics{
-            float ix_vel;
-            float iy_vel;
-            Eigen::Matrix2f rotate;  
-        };
+        Dynamics robot_param;
+		MyOdom d_my_odom;
         CellDynamics cell_max_dynamics;
         CellDynamics cell_odom;
+		UnitVectorOXY src_uv;
+		UnitVectorOXY dst_uv;
+
 
 
 };
