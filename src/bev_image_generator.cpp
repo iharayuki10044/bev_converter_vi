@@ -59,37 +59,26 @@ void BEVImageGenerator::odom_callback(const nav_msgs::OdometryConstPtr &msg)
 
 	odom = *msg;
 
+    geometry_quat.x = odom.pose.pose.orientation.x;
+    geometry_quat.y = odom.pose.pose.orientation.y;
+    geometry_quat.z = odom.pose.pose.orientation.z;
+    geometry_quat.w = odom.pose.pose.orientation.w;
+    quaternionMsgToTF(geometry_quat, quat);
+    tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+
+	if(first_flag){
+		pre_my_odom = now_my_odom;
+	}
+
+    now_my_odom.x = odom.pose.pose.position.x;
+    now_my_odom.y = odom.pose.pose.position.y;
+    now_my_odom.z = odom.pose.pose.position.z;
+    now_my_odom.roll = roll;
+    now_my_odom.pitch = pitch;
+    now_my_odom.yaw = yaw;
+
 	if(!first_flag){
-		geometry_quat.x = odom.pose.pose.orientation.x;
-		geometry_quat.y = odom.pose.pose.orientation.y;
-		geometry_quat.z = odom.pose.pose.orientation.z;
-		geometry_quat.w = odom.pose.pose.orientation.w;
-		quaternionMsgToTF(geometry_quat, quat);
-		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-
-		now_my_odom.x = odom.pose.pose.position.x;
-		now_my_odom.y = odom.pose.pose.position.y;
-		now_my_odom.z = odom.pose.pose.position.z;
-		now_my_odom.roll = roll;
-		now_my_odom.pitch = pitch;
-		now_my_odom.yaw = yaw;
 		pre_my_odom = now_my_odom;
-	}else{
-		pre_my_odom = now_my_odom;
-
-		geometry_quat.x = odom.pose.pose.orientation.x;
-		geometry_quat.y = odom.pose.pose.orientation.y;
-		geometry_quat.z = odom.pose.pose.orientation.z;
-		geometry_quat.w = odom.pose.pose.orientation.w;
-		quaternionMsgToTF(geometry_quat, quat);
-		tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-
-		now_my_odom.x = odom.pose.pose.position.x;
-		now_my_odom.y = odom.pose.pose.position.y;
-		now_my_odom.z = odom.pose.pose.position.z;
-		now_my_odom.roll = roll;
-		now_my_odom.pitch = pitch;
-		now_my_odom.yaw = yaw;
 	}
 
 	d_my_odom.x = now_my_odom.x - pre_my_odom.x;
