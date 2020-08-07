@@ -14,6 +14,7 @@ BEVImageGenerator::BEVImageGenerator(void)
     grid_subscriber = nh.subscribe("/bev/grid", 10, &BEVImageGenerator::grid_callback, this);
     odom_subscriber = nh.subscribe("/estimated_pose/pose", 10, &BEVImageGenerator::odom_callback, this);
     bev_image_publisher = nh.advertise<>("/bev/image", 10);
+    bev_transformed_image_publisher = nh.advertise<>("/bev/transformed_image", 10);
 }
 
 
@@ -29,6 +30,9 @@ void BEVImageGenerator::execution(void)
 
 
 		if(pc_callback_flag && odom_callback_flag){
+            transformed_grid_img = image_transformer();
+            bev_image_publisher.publish();
+            bev_transformed_image_publisher.publish();
 
 			first_flag = true;
 			grid_callback_flag = false;
@@ -152,11 +156,11 @@ void BEVImageGenerator::initializer(void)
 Eigen::Vector2i BEVImageGenerator::cell_motion_calculator(int vector_)
 {
     switch(vector_){
-        case uv_o:
+        case UV_O:
             Eigen::Vector3d src_unit_vector << 0.0, 0.0, 1.0;
-        case uv_x:
+        case UV_X:
             Eigen::Vector3d src_unit_vector << 1.0, 0.0, 1.0;
-        case uv_y:
+        case UV_Y:
             Eigen::Vector3d src_unit_vector << 0.0, 1.0, 1.0;
         default:
             break;
@@ -182,16 +186,42 @@ Eigen::Vector2i BEVImageGenerator::cell_motion_calculator(int vector_)
 }
 
 
-UnitVectorOXY BEVImageGenerator::unit_vector_registrator(void)
+void BEVImageGenerator::unit_vector_registrator(void)
 {
-    unit_vector.dst.o += cell_motion_calculator(uv_o);
-    unit_vector.dst.x += cell_motion_calculator(uv_x);
-    unit_vector.dst.y += cell_motion_calculator(uv_y);
+    unit_vector.dst.o += cell_motion_calculator(UV_O);
+    unit_vector.dst.x += cell_motion_calculator(UV_X);
+    unit_vector.dst.y += cell_motion_calculator(UV_Y);
 }
 
 
-void BEVImageGenerator::image_transformer(nav_msgs::OccupancyGrid &grid)
+cv::Mat BEVImageGenerator::image_transformer(void)
 {
+    unit_vector_registrator();
+    const cv::Mat src_img = input_grid_img;
+    const Point2f src_pt[] = {Point2f(unit_vector.src.o[Col], unit_vector.src.o[Row]),
+                              Point2f(unit_vector.src.x[Col], unit_vector.src.x[Row]), 
+                              Point2f(unit_vector.src.y[Col], unit_vector.src.y[Row])};
+    const Point2f dst_pt[] = {Point2f(unit_vector.dst.o[Col], unit_vector.dst.o[Row]),
+                              Point2f(unit_vector.dst.x[Col], unit_vector.dst.x[Row]), 
+                              Point2f(unit_vector.dst.y[Col], unit_vector.dst.y[Row])};
+    const cv::Mat affine_matrix = getAffineTransform(src_pt, dst_pt);
+    cv::Mat dst_img;
+    cv::warpAffine(src_img, dst_img, affine_matrix, src_img.size(), CV_INTER_LINEAR, cv::BORDER_TRANSPARENT);
+    
+    cv::line(src_img, src_pt[0], src_pt[1], Scalar(255,255,0), 2);
+    cv::line(src_img, src_pt[1], src_pt[2], Scalar(255,255,0), 2);
+    cv::line(src_img, src_pt[2], src_pt[0], Scalar(255,255,0), 2);
+    cv::line(src_img, dst_pt[0], dst_pt[1], Scalar(255,0,255), 2);
+    cv::line(src_img, dst_pt[1], dst_pt[2], Scalar(255,0,255), 2);
+    cv::line(src_img, dst_pt[2], dst_pt[0], Scalar(255,0,255), 2);
+
+    cv::namedWindow("src", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("dst", CV_WINDOW_AUTOSIZE);
+    cv::imshow("src", src_img);
+    cv::imshow("dst", dst_img);
+    cv::waitKey(1000*(int)dt);
+
+    return dst_img;
 }
 
 

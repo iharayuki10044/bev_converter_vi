@@ -54,9 +54,9 @@ class BEVImageGenerator
 		void odom_callback(const nav_msgs::OdometryConstPtr&);
         void formatter(void);
         void initializer(void);
-        Motion cell_motion_calculator(MyOdom&);
-		UnitVectorOXY unit_vector_registrator(bool);
-        void image_transformer(nav_msgs::OccupancyGrid&);
+        Eigen::Vector2i cell_motion_calculator(int);
+		void unit_vector_registrator(void);
+        cv::Mat image_transformer(void);
 
 	private:
         XmlRpc::XmlRpcValue CATS_MOTION_PARAM;
@@ -67,9 +67,9 @@ class BEVImageGenerator
 		bool tf_listen_flag = false;
 
 		constexpr float Occupied = 1.0, Free = 0.0, Unknown = 0.5;
-        constexpr int uv_o = 0, int uv_x = 1, int uv_y = 2; // uv : unit vector
-		constexpr int col; //i↓  ...   ↑x
-		constexpr int row; //j→  ... y←o
+        constexpr int UV_O = 0, int UV_X = 1, int UV_Y = 2; // uv : unit vector
+		constexpr int Col = 0; //i↓  ...   ↑x
+		constexpr int Row = 1; //j→  ... y←o
 
 		double Hz, dt;
 
@@ -83,12 +83,14 @@ class BEVImageGenerator
 		ros::Subscriber grid_subscriber;
 		ros::Subscriber odom_subscriber;
 		ros::Publisher bev_image_publisher;
+		ros::Publisher bev_transformed_image_publisher;
 		
         nav_msgs::OccupancyGrid bev_grid;
 
         // Eigen::Vector3f zero_vector = Eigen::Vector3f::Zero();
 
         cv::Mat input_grid_img;
+        cv::Mat transformed_grid_img;
 
         Dynamics robot_param;
         MyOdom max_motion;
