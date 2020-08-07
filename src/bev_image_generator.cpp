@@ -13,8 +13,8 @@ BEVImageGenerator::BEVImageGenerator(void)
 
     grid_subscriber = nh.subscribe("/bev/grid", 10, &BEVImageGenerator::grid_callback, this);
     odom_subscriber = nh.subscribe("/estimated_pose/pose", 10, &BEVImageGenerator::odom_callback, this);
-    bev_image_publisher = nh.advertise<>("/bev/image", 10);
-    bev_transformed_image_publisher = nh.advertise<>("/bev/transformed_image", 10);
+    // bev_image_publisher = nh.advertise<>("/bev/image", 10);
+    // bev_transformed_image_publisher = nh.advertise<>("/bev/transformed_image", 10);
 }
 
 
@@ -31,8 +31,8 @@ void BEVImageGenerator::execution(void)
 
 		if(pc_callback_flag && odom_callback_flag){
             transformed_grid_img = image_transformer();
-            bev_image_publisher.publish();
-            bev_transformed_image_publisher.publish();
+            // bev_image_publisher.publish();
+            // bev_transformed_image_publisher.publish();
 
 			first_flag = true;
 			grid_callback_flag = false;
