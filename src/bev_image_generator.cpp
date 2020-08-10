@@ -3,13 +3,12 @@
 BEVImageGenerator::BEVImageGenerator(void)
 : nh("~")
 {
-    nh.param("WIDTH", WIDTH, {18.0});
-    nh.param("HEIGHT", HEIGHT, {18.0});
-    nh.param("GRID_NUM_X", GRID_NUM_X, {60});
-    nh.param("GRID_NUM_Y", GRID_NUM_Y, {60});
+    nh.param("RANGE", WIDTH, {18.0});
+    nh.param("RANGE", RANGE, {18.0});
+    nh.param("GRID_NUM", GRID_NUM, {60});
     nh.param("Hz", Hz, {100.0});
     // nh.param("");
-    nh.getParam("CATS_MOTION_PARAM", CATS_MOTION_PARAM);
+    nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
     grid_subscriber = nh.subscribe("/bev/grid", 10, &BEVImageGenerator::grid_callback, this);
     odom_subscriber = nh.subscribe("/estimated_pose/pose", 10, &BEVImageGenerator::odom_callback, this);
@@ -30,7 +29,8 @@ void BEVImageGenerator::execution(void)
 
 
 		if(pc_callback_flag && odom_callback_flag){
-            transformed_grid_img = image_transformer();
+            cv::Mat transformed_grid_img = image_transformer(input_grid_img);
+            cropped_transformed_grid_img = image_cropper(transformed_grid_img);
             // bev_image_publisher.publish();
             // bev_transformed_image_publisher.publish();
 
@@ -119,30 +119,27 @@ void BEVImageGenerator::odom_callback(const nav_msgs::OdometryConstPtr &msg)
 void BEVImageGenerator::formatter(void)
 {
     dt = 1.0 / Hz;
+    grid_size = RANGE / GRID_NUM;
 
-    grid_size_x = WIDTH / GRID_NUM_X;
-    grid_size_y = HEIGHT / GRID_NUM_Y;
-    grid_size_z = 0.5 * (grid_size_x + grid_size_y);
+    robot_param.max_acceleration = ROBOT_PARAM["MAX_ACCELERATION"];
+    robot_param.max_yawrate = ROBOT_PARAM["MAX_YAWRATE"];
+    robot_param.max_d_yawrate = ROBOT_PARAM["MAX_D_YAWRATE"];
+    robot_param.max_wheel_angular_velocyty = ROBOT_PARAM["MAX_WHEEL_ANGULAR_VELOCITY"];
+    robot_param.wheel_radius = ROBOT_PARAM["WHEEL_RADIUS"];
+    robot_param.tread = ROBOT_PARAM["TREAD"];
 
-    robot_param.max_acceleration = CATS_MOTION_PARAM["MAX_ACCELERATION"];
-    robot_param.max_yawrate = CATS_MOTION_PARAM["MAX_YAWRATE"];
-    robot_param.max_d_yawrate = CATS_MOTION_PARAM["MAX_D_YAWRATE"];
-    robot_param.max_wheel_angular_velocyty = CATS_MOTION_PARAM["MAX_WHEEL_ANGULAR_VELOCITY"];
-    robot_param.wheel_radius = CATS_MOTION_PARAM["WHEEL_RADIUS"];
-    robot_param.tread = CATS_MOTION_PARAM["TREAD"];
-    max_motion.x = robot_param.wheel_radius * robot_param.max_wheel_angular_velocyty;
-    max_motion.y = robot_param.wheel_radius * robot_param.max_wheel_angular_velocyty;
-    max_motion.z = 0.0;
-    max_motion.roll = 0.0;
-    max_motion.pitch = 0.0;
-    max_motion.yaw = robot_param.max_yawrate * dt;
+    double crop_distance_forward = robot_param.wheel_radius * robot_param.max_wheel_angular_velocyty * dt;
+    double crop_distance_rotate = 0.5 * RANGE * tan(robot_param.max_yawrate * dt);
+    if(){
 
-    unit_vector.src.o[Col] = GRID_NUM_X / 2;
-    unit_vector.src.o[Row] = GRID_NUM_Y / 2;
-    unit_vector.src.x[Col] = GRID_NUM_X / 2 - 1;
-    unit_vector.src.x[Row] = GRID_NUM_Y / 2;
-    unit_vector.src.y[Col] = GRID_NUM_X / 2;
-    unit_vector.src.y[Row] = GRID_NUM_Y / 2 - 1;
+    }
+
+    unit_vector.src.o[Col] = GRID_NUM / 2;
+    unit_vector.src.o[Row] = GRID_NUM / 2;
+    unit_vector.src.x[Col] = GRID_NUM / 2 - 1;
+    unit_vector.src.x[Row] = GRID_NUM / 2;
+    unit_vector.src.y[Col] = GRID_NUM / 2;
+    unit_vector.src.y[Row] = GRID_NUM / 2 - 1;
 }
 
 
@@ -153,29 +150,33 @@ void BEVImageGenerator::initializer(void)
 
 
 
-Eigen::Vector2i BEVImageGenerator::cell_motion_calculator(int vector_)
+// Eigen::Vector2i BEVImageGenerator::cell_motion_calculator(int vector_)
+Eigen::Vector2i BEVImageGenerator::cell_motion_calculator(std::string dim)
 {
-    switch(vector_){
-        case UV_O:
+    switch(UnitVector[dim]){
+        case 1: // unit_vector_o
             Eigen::Vector3d src_unit_vector << 0.0, 0.0, 1.0;
-        case UV_X:
+            break;
+        case 2: // unit_vector_x
             Eigen::Vector3d src_unit_vector << 1.0, 0.0, 1.0;
-        case UV_Y:
+            break;
+        case 3: // unit_vector_y
             Eigen::Vector3d src_unit_vector << 0.0, 1.0, 1.0;
+            break;
         default:
+            Eigen::Vector3d src_unit_vector = Eigen::Vector3d::Zero();
             break;
     }
 
     Eigen::Vector3d homogenous_tf;
-    // Eigen::Vector3d movement;
     Eigen::Vector2i cell_movement
 
     homogenous_tf(0, 0) = cos(d_my_odom.yaw);
     homogenous_tf(0, 1) = -sin(d_my_odom.yaw);
     homogenous_tf(1, 0) = sin(d_my_odom.yaw);
     homogenous_tf(1, 1) = cos(d_my_odom.yaw);
-    homogenous_tf(0, 2) = d_my_odom.x / grid_size_x;
-    homogenous_tf(1, 2) = d_my_odom.y / grid_size_y;
+    homogenous_tf(0, 2) = d_my_odom.x / grid_size;
+    homogenous_tf(1, 2) = d_my_odom.y / grid_size;
     homogenous_tf(2, 0) = 0.0;
     homogenous_tf(2, 1) = 0.0;
     homogenous_tf(2, 2) = 1.0;
@@ -188,16 +189,15 @@ Eigen::Vector2i BEVImageGenerator::cell_motion_calculator(int vector_)
 
 void BEVImageGenerator::unit_vector_registrator(void)
 {
-    unit_vector.dst.o += cell_motion_calculator(UV_O);
-    unit_vector.dst.x += cell_motion_calculator(UV_X);
-    unit_vector.dst.y += cell_motion_calculator(UV_Y);
+    unit_vector.dst.o += cell_motion_calculator("unit_vector_o");
+    unit_vector.dst.x += cell_motion_calculator("unit_vector_x");
+    unit_vector.dst.y += cell_motion_calculator("unit_vector_y");
 }
 
 
-cv::Mat BEVImageGenerator::image_transformer(void)
+cv::Mat BEVImageGenerator::image_transformer(cv::Mat src_img)
 {
     unit_vector_registrator();
-    const cv::Mat src_img = input_grid_img;
     const Point2f src_pt[] = {Point2f(unit_vector.src.o[Col], unit_vector.src.o[Row]),
                               Point2f(unit_vector.src.x[Col], unit_vector.src.x[Row]), 
                               Point2f(unit_vector.src.y[Col], unit_vector.src.y[Row])};
@@ -225,7 +225,13 @@ cv::Mat BEVImageGenerator::image_transformer(void)
 }
 
 
+cv::Mat BEVImageGenerator::image_cropper(cv::Mat src_img)
+{
+    cv::Rect roi(cv::Point(, ), cv::Size(, ));
+    cv::Mat dst_img = src_img(roi);
 
+    return dst_img;
+}
 
 
 
