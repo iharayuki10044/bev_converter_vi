@@ -54,12 +54,13 @@ class BEVImageGenerator
 		void odom_callback(const nav_msgs::OdometryConstPtr&);
         void formatter(void);
         void initializer(void);
-        Eigen::Vector2i cell_motion_calculator(int);
+        Eigen::Vector2i cell_motion_calculator(const int);
 		void unit_vector_registrator(void);
-        cv::Mat image_transformer(void);
+        cv::Mat image_transformer(cv::Mat);
+        cv::Mat image_cropper(cv::Mat);
 
 	private:
-        XmlRpc::XmlRpcValue CATS_MOTION_PARAM;
+        XmlRpc::XmlRpcValue ROBOT_PARAM;
 
 		bool first_flag = false;
 		bool grid_callback_flag = false;
@@ -67,15 +68,19 @@ class BEVImageGenerator
 		bool tf_listen_flag = false;
 
 		constexpr float Occupied = 1.0, Free = 0.0, Unknown = 0.5;
-        constexpr int UV_O = 0, int UV_X = 1, int UV_Y = 2; // uv : unit vector
 		constexpr int Col = 0; //i↓  ...   ↑x
 		constexpr int Row = 1; //j→  ... y←o
+        // constexpr int UV_O = 0, int UV_X = 1, int UV_Y = 2; // uv : unit vector
+        constexpr std::map<std::string, int, std::less<> > UnitVector = {{"unit_vector_o", 1},
+                                                                         {"unit_vector_x", 2},
+                                                                         {"unit_vector_y", 3}};
+        constexpr std::map<std::string, int, std::less<> > CropJudge = {{"forward", 1},
+                                                                        {"rotate", 2}};
 
 		double Hz, dt;
-
-        double WIDTH, HEIGHT; // x, y;
-        int GRID_NUM_X, GRID_NUM_Y;
-        float grid_size_x, grid_size_y, grid_size_z;
+        double RANGE;
+        int GRID_NUM;
+        float grid_size;
 
         ros::NodeHandle n;
         ros::NodeHandle nh;
@@ -90,10 +95,8 @@ class BEVImageGenerator
         // Eigen::Vector3f zero_vector = Eigen::Vector3f::Zero();
 
         cv::Mat input_grid_img;
-        cv::Mat transformed_grid_img;
 
         Dynamics robot_param;
-        MyOdom max_motion;
 		MyOdom d_my_odom;
 		UnitVectorOXY unit_vector;
 
