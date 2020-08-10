@@ -128,10 +128,16 @@ void BEVImageGenerator::formatter(void)
     robot_param.wheel_radius = ROBOT_PARAM["WHEEL_RADIUS"];
     robot_param.tread = ROBOT_PARAM["TREAD"];
 
-    double crop_distance_forward = robot_param.wheel_radius * robot_param.max_wheel_angular_velocyty * dt;
-    double crop_distance_rotate = 0.5 * RANGE * tan(robot_param.max_yawrate * dt);
-    if(){
-
+    int crop_size_forward = (int)(robot_param.wheel_radius * robot_param.max_wheel_angular_velocyty * dt / grid_size);
+    int crop_size_rotate = (int)(0.5 * RANGE * tan(robot_param.max_yawrate * dt) / grid_size);
+    if(crop_size_forward < crop_size_rotate){
+        crop_size = crop_size_rotate;
+        std::cout << "crop mode : rotate" << std::endl;
+        std::cout << "crop_size : " << crop_size_rotate << std::endl;
+    }else{
+        crop_size = crop_size_forward;
+        std::cout << "crop mode : forward" << std::endl;
+        std::cout << "crop_size : " << crop_size_forward << std::endl;
     }
 
     unit_vector.src.o[Col] = GRID_NUM / 2;
@@ -227,7 +233,7 @@ cv::Mat BEVImageGenerator::image_transformer(cv::Mat src_img)
 
 cv::Mat BEVImageGenerator::image_cropper(cv::Mat src_img)
 {
-    cv::Rect roi(cv::Point(, ), cv::Size(, ));
+    cv::Rect roi(cv::Point(crop_size, crop_size), cv::Size(GRID_NUM - 2 * crop_size, GRID_NUM - 2 * crop_size));
     cv::Mat dst_img = src_img(roi);
 
     return dst_img;

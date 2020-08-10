@@ -71,16 +71,14 @@ class BEVImageGenerator
 		constexpr int Col = 0; //i↓  ...   ↑x
 		constexpr int Row = 1; //j→  ... y←o
         // constexpr int UV_O = 0, int UV_X = 1, int UV_Y = 2; // uv : unit vector
-        constexpr std::map<std::string, int, std::less<> > UnitVector = {{"unit_vector_o", 1},
-                                                                         {"unit_vector_x", 2},
-                                                                         {"unit_vector_y", 3}};
-        constexpr std::map<std::string, int, std::less<> > CropJudge = {{"forward", 1},
-                                                                        {"rotate", 2}};
+        constexpr std::map<std::string, int> UnitVector = {{"unit_vector_o", 1},
+                                                           {"unit_vector_x", 2},
+                                                           {"unit_vector_y", 3}};
+        constexpr std::map<std::string, int> CropMode = {{"forward", 1},
+                                                         {"rotate", 2}};
 
-		double Hz, dt;
-        double RANGE;
-        int GRID_NUM;
-        float grid_size;
+        int GRID_NUM, crop_size;
+        double RANGE, Hz, grid_size, dt;
 
         ros::NodeHandle n;
         ros::NodeHandle nh;
