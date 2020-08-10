@@ -1,15 +1,13 @@
 <launch>
-    <arg name="max_range" default="18.0"/>
+    <arg name="range" default="18.0"/>
     <arg name="grid_num" default="60"/>
     <arg name="hz" default="100.0"/>
 
 	<param name="use_sim_time" value="true"/>
 	
 	<node pkg="bev_converter" type="bev_image_generator" name="bev_image_generator" output="screen">
-		<param name="WIDTH" value="$(arg max_range)" type="double"/>
-		<param name="HEIGHT" value="$(arg max_range)" type="double"/>
-		<param name="GRID_NUM_X" value="$(arg grid_num)" type="int"/>
-		<param name="GRID_NUM_Y" value="$(arg grid_num)" type="int"/>
+		<param name="RANGE" value="$(arg range)" type="double"/>
+		<param name="GRID_NUM" value="$(arg grid_num)" type="int"/>
 		<param name="Hz" value="$(arg hz)" type="double"/>
         <rosparam command="load" file="$(find cats)/config/cats_motion_param.yaml"/>
 	</node>
