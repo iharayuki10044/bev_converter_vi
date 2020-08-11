@@ -64,7 +64,7 @@ class BEVImageGenerator
 	private:
         XmlRpc::XmlRpcValue ROBOT_PARAM;
 
-		bool first_flag = false;
+		static bool first_flag = false;
 		bool grid_callback_flag = false;
 		bool odom_callback_flag = false;
 		bool tf_listen_flag = false;

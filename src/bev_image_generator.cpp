@@ -21,14 +21,15 @@ cv::Mat BEVImageGenerator::execution(void)
 {
 	std::cout << "formatter" << std::endl;
     formatter();
-
+    /*
 	ros::Rate r((int)Hz);
 	while(ros::ok()){
+    */
 		std::cout << "initializer" << std::endl;
         initializer();
 
 
-		if(pc_callback_flag && odom_callback_flag){
+		if(grid_callback_flag && odom_callback_flag){
             cv::Mat transformed_grid_img = image_transformer(input_grid_img);
             cropped_transformed_grid_img = image_cropper(transformed_grid_img);
             // bev_image_publisher.publish();
@@ -38,10 +39,12 @@ cv::Mat BEVImageGenerator::execution(void)
 			grid_callback_flag = false;
 			odom_callback_flag = false;
 		}
-
+    /*
 		r.sleep();
 		ros::spinOnce();
 	}
+    */
+    return cropped_transformed_grid_img;
 }
 
 
