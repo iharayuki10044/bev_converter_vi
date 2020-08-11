@@ -12,6 +12,8 @@
 #include <tf/transform_broadcaster.h>
 
 #include <opencv2/opencv.hpp>
+#include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
 
 #include "Eigen/Core"
 #include "Eigen/Dense"

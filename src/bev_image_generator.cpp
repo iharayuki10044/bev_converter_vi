@@ -17,7 +17,7 @@ BEVImageGenerator::BEVImageGenerator(void)
 }
 
 
-void BEVImageGenerator::execution(void)
+cv::Mat BEVImageGenerator::execution(void)
 {
 	std::cout << "formatter" << std::endl;
     formatter();
