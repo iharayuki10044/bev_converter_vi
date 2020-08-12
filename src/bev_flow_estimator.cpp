@@ -16,7 +16,7 @@ BEVFlowEstimator::BEVFlowEstimator(void)
 }
 
 
-void BEVFlowEstimator::execution(void)
+void BEVFlowEstimator::executor(void)
 {
 	std::cout << "formatter" << std::endl;
     formatter();
@@ -30,6 +30,9 @@ void BEVFlowEstimator::execution(void)
         bev_image_generator.initializer();
 
 		if(grid_callback_flag){
+            cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img);
+            cropped_transformed_grid_img = bev_image_generator.cropped_transformed_grid_img_generator(pre_input_grid_img);
+
 
 			first_flag = true;
 			grid_callback_flag = false;
@@ -64,6 +67,10 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
     mat.getEulerYPR(yaw, pitch, roll);
     double map_theta = yaw;
 
+    if(first_flag){
+        pre_input_grid_img = input_grid_img;
+    }
+    
     input_grid_img = Mat::zeros(cv::Size(bev_grid.info.width,bev_grid.info.height), CV_8UC1);
 
     for(unsigned int col = 0; col < bev_grid.info.height; col++){
@@ -77,5 +84,12 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
         }
     }
 
+    if(!first_flag){
+        pre_input_grid_img = input_grid_img;
+    }
+
     grid_callback_flag = true;
 }
+
+
+

@@ -16,7 +16,7 @@ BEVImageGenerator::BEVImageGenerator(void)
 }
 
 
-cv::Mat BEVImageGenerator::cropped_current_grid_img_generator(const cv::Mat& src_img)
+cv::Mat BEVImageGenerator::cropped_current_grid_img_generator(cv::Mat& src_img)
 {
     cv::Mat dst_img = image_cropper(src_img);
 
@@ -24,7 +24,7 @@ cv::Mat BEVImageGenerator::cropped_current_grid_img_generator(const cv::Mat& src
 }
 
 
-cv::Mat BEVImageGenerator::cropped_transformed_grid_img_generator(const cv::Mat& src_img)
+cv::Mat BEVImageGenerator::cropped_transformed_grid_img_generator(cv::Mat& src_img)
 {
     cv::Mat transformed_grid_img, dst_img;
 
@@ -122,7 +122,6 @@ void BEVImageGenerator::initializer(void)
 
 
 
-// Eigen::Vector2i BEVImageGenerator::cell_motion_calculator(int vector_)
 Eigen::Vector2i BEVImageGenerator::cell_motion_calculator(std::string dim)
 {
     switch(UnitVector[dim]){
@@ -167,7 +166,7 @@ void BEVImageGenerator::unit_vector_registrator(void)
 }
 
 
-cv::Mat BEVImageGenerator::image_transformer(cv::Mat src_img)
+cv::Mat BEVImageGenerator::image_transformer(cv::Mat& src_img)
 {
     unit_vector_registrator();
     const Point2f src_pt[] = {Point2f(unit_vector.src.o[Col], unit_vector.src.o[Row]),
@@ -197,7 +196,7 @@ cv::Mat BEVImageGenerator::image_transformer(cv::Mat src_img)
 }
 
 
-cv::Mat BEVImageGenerator::image_cropper(cv::Mat src_img)
+cv::Mat BEVImageGenerator::image_cropper(cv::Mat& src_img)
 {
     cv::Rect roi(cv::Point(crop_size, crop_size), cv::Size(GRID_NUM - 2 * crop_size, GRID_NUM - 2 * crop_size));
     cv::Mat dst_img = src_img(roi);

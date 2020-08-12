@@ -51,15 +51,15 @@ class BEVImageGenerator
             OXY dst;
 		};
 
-		cv::Mat cropped_current_grid_img_generator(const cv::Mat&);
-		cv::Mat cropped_transformed_grid_img_generator(const cv::Mat&);
+		cv::Mat cropped_current_grid_img_generator(cv::Mat&);
+		cv::Mat cropped_transformed_grid_img_generator(cv::Mat&);
 		void odom_callback(const nav_msgs::OdometryConstPtr&);
         void formatter(void);
         void initializer(void);
         Eigen::Vector2i cell_motion_calculator(std::string);
 		void unit_vector_registrator(void);
-        cv::Mat image_transformer(cv::Mat);
-        cv::Mat image_cropper(cv::Mat);
+        cv::Mat image_transformer(cv::Mat&);
+        cv::Mat image_cropper(cv::Mat&);
 
 	private:
         XmlRpc::XmlRpcValue ROBOT_PARAM;
@@ -94,9 +94,6 @@ class BEVImageGenerator
         nav_msgs::OccupancyGrid bev_grid;
 
         // Eigen::Vector3f zero_vector = Eigen::Vector3f::Zero();
-
-        static cv::Mat cropped_current_grid_img;
-        static cv::Mat cropped_transformed_grid_img;
 
 		MyOdom d_my_odom;
         static MyOdom pre_my_odom;

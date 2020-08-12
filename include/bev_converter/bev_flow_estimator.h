@@ -2,14 +2,9 @@
 #define __BEV_FLOW_ESTIMATOR_H
 
 #include <ros/ros.h>
-#include <sensor_msgs/PointCloud2.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Pose.h>
-#include <tf/tf.h>
-#include <tf/transform_listener.h>
-#include <tf/transform_datatypes.h>
-#include <tf/transform_broadcaster.h>
 
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
@@ -26,7 +21,7 @@ class BEVFlowEstimator
 	public:
 		BEVFlowEstimator(void);
 
-		void execution(void);
+		void executor(void);
         void formatter(void);
         void initializer(void);
 		void grid_callback(const nav_msgs::OccupancyGridConstPtr&);
@@ -53,6 +48,9 @@ class BEVFlowEstimator
         // Eigen::Vector3f zero_vector = Eigen::Vector3f::Zero();
 
         cv::Mat input_grid_img;
+        cv::Mat pre_input_grid_img;
+        cv::Mat cropped_current_grid_img;
+        cv::Mat cropped_transformed_grid_img;
 
 };
 
