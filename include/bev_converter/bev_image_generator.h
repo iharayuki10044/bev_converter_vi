@@ -56,7 +56,7 @@ class BEVImageGenerator
 		void odom_callback(const nav_msgs::OdometryConstPtr&);
         void formatter(void);
         void initializer(void);
-        Eigen::Vector2i cell_motion_calculator(const int);
+        Eigen::Vector2i cell_motion_calculator(std::string);
 		void unit_vector_registrator(void);
         cv::Mat image_transformer(cv::Mat);
         cv::Mat image_cropper(cv::Mat);

@@ -29,12 +29,10 @@ void BEVFlowEstimator::execution(void)
         initializer();
         bev_image_generator.initializer();
 
-
-		if(pc_callback_flag && odom_callback_flag){
+		if(grid_callback_flag){
 
 			first_flag = true;
 			grid_callback_flag = false;
-			odom_callback_flag = false;
 		}
 
 		r.sleep();
@@ -48,14 +46,12 @@ void BEVFlowEstimator::formatter(void)
 {
     dt = 1.0 / Hz;
     grid_size = RANGE / GRID_NUM;
-
 }
 
 
 void BEVFlowEstimator::initializer(void)
 {
 }
-
 
 
 void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
