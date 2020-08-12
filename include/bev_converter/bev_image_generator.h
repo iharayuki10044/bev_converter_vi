@@ -51,8 +51,8 @@ class BEVImageGenerator
             OXY dst;
 		};
 
-		void execution(void);
-		void grid_callback(const nav_msgs::OccupancyGridConstPtr&);
+		cv::Mat cropped_current_grid_img_generator(const cv::Mat&);
+		cv::Mat cropped_transformed_grid_img_generator(const cv::Mat&);
 		void odom_callback(const nav_msgs::OdometryConstPtr&);
         void formatter(void);
         void initializer(void);
@@ -64,10 +64,9 @@ class BEVImageGenerator
 	private:
         XmlRpc::XmlRpcValue ROBOT_PARAM;
 
+		static bool grid_callback_flag = false;
+		static bool odom_callback_flag = false;
 		static bool first_flag = false;
-		bool grid_callback_flag = false;
-		bool odom_callback_flag = false;
-		bool tf_listen_flag = false;
 
 		constexpr float Occupied = 1.0, Free = 0.0, Unknown = 0.5;
 		constexpr int Col = 0; //i↓  ...   ↑x
@@ -79,8 +78,10 @@ class BEVImageGenerator
         constexpr std::map<std::string, int> CropMode = {{"forward", 1},
                                                          {"rotate", 2}};
 
-        int GRID_NUM, crop_size;
-        double RANGE, Hz, grid_size, dt;
+        int GRID_NUM;
+        static int crop_size;
+        double RANGE;
+        static double Hz, dt, grid_size;
 
         ros::NodeHandle n;
         ros::NodeHandle nh;
@@ -94,11 +95,14 @@ class BEVImageGenerator
 
         // Eigen::Vector3f zero_vector = Eigen::Vector3f::Zero();
 
-        cv::Mat input_grid_img;
+        static cv::Mat cropped_current_grid_img;
+        static cv::Mat cropped_transformed_grid_img;
 
-        Dynamics robot_param;
 		MyOdom d_my_odom;
-		UnitVectorOXY unit_vector;
+        static MyOdom pre_my_odom;
+        static MyOdom now_my_odom;
+        static Dynamics robot_param;
+		static UnitVectorOXY unit_vector;
 
 
 

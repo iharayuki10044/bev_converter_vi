@@ -10,75 +10,38 @@ BEVImageGenerator::BEVImageGenerator(void)
     // nh.param("");
     nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
-    grid_subscriber = nh.subscribe("/bev/grid", 10, &BEVImageGenerator::grid_callback, this);
     odom_subscriber = nh.subscribe("/estimated_pose/pose", 10, &BEVImageGenerator::odom_callback, this);
     // bev_image_publisher = nh.advertise<>("/bev/image", 10);
     // bev_transformed_image_publisher = nh.advertise<>("/bev/transformed_image", 10);
 }
 
 
-cv::Mat BEVImageGenerator::execution(void)
+cv::Mat BEVImageGenerator::cropped_current_grid_img_generator(const cv::Mat& src_img)
 {
-	std::cout << "formatter" << std::endl;
-    formatter();
-    /*
-	ros::Rate r((int)Hz);
-	while(ros::ok()){
-    */
-		std::cout << "initializer" << std::endl;
-        initializer();
+    cv::Mat dst_img = image_cropper(src_img);
 
-
-		if(grid_callback_flag && odom_callback_flag){
-            cv::Mat transformed_grid_img = image_transformer(input_grid_img);
-            cropped_transformed_grid_img = image_cropper(transformed_grid_img);
-            // bev_image_publisher.publish();
-            // bev_transformed_image_publisher.publish();
-
-			first_flag = true;
-			grid_callback_flag = false;
-			odom_callback_flag = false;
-		}
-    /*
-		r.sleep();
-		ros::spinOnce();
-	}
-    */
-    return cropped_transformed_grid_img;
+    return dst_img;
 }
 
 
-void BEVImageGenerator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
+cv::Mat BEVImageGenerator::cropped_transformed_grid_img_generator(const cv::Mat& src_img)
 {
-    bev_grid = *msg;
-    
-    double yaw, pitch, roll;
-    geometry_msgs::Quaternion orientation = bev_grid.info.origin.orientation;
-    tf::Matrix3x3 mat(tf::Quaternion(orientation.x, orientation.y, orientation.z, orientation.w));
-    mat.getEulerYPR(yaw, pitch, roll);
-    double map_theta = yaw;
+    cv::Mat transformed_grid_img, dst_img;
 
-    input_grid_img = Mat::zeros(cv::Size(bev_grid.info.width,bev_grid.info.height), CV_8UC1);
-
-    for(unsigned int col = 0; col < bev_grid.info.height; col++){
-        for(unsigned int row = 0; row < bev_grid.info.width; row++){
-            unsigned int i = row + (bev_grid.info.height - col - 1) * bev_grid.info.width;
-            int intensity = 205;
-            if(0 <= bev_grid.data[i] && brv_grid.data[i] <= 100){
-                intensity = round((float)(100.0 - bev_grid.data[i]) * 2.55);
-            }
-            input_grid_img.at<unsigned char>(col, row) = intensity;
-        }
+    if(odom_callback_flag){
+        transformed_grid_img = image_transformer(src_img);
+        dst_img = image_cropper(transformed_grid_img);
+        odom_callback_flag = false;
     }
 
-    grid_callback_flag = true;
+    return dst_img;
 }
+
+
 
 
 void BEVImageGenerator::odom_callback(const nav_msgs::OdometryConstPtr &msg)
 {
-	static MyOdom pre_my_odom;
-	static MyOdom now_my_odom;
 	tf::Quaternion quat;
 	geometry_msgs::Quaternion geometry_quat;
     nav_msgs::Odometry odom;

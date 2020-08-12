@@ -29,6 +29,7 @@ class BEVFlowEstimator
 		void execution(void);
         void formatter(void);
         void initializer(void);
+		void grid_callback(const nav_msgs::OccupancyGridConstPtr&);
 
 	private:
 		bool first_flag = false;
