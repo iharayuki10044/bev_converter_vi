@@ -1,18 +1,15 @@
 #include "bev_converter/bev_image_generator.h"
 
-BEVImageGenerator::BEVImageGenerator(void)
+BEVImageGenerator::BEVImageGenerator(double range, int grid_num)
 : nh("~")
 {
-    nh.param("RANGE", WIDTH, {18.0});
-    nh.param("RANGE", RANGE, {18.0});
-    nh.param("GRID_NUM", GRID_NUM, {60});
-    nh.param("Hz", Hz, {100.0});
+    RANGE = range;
+    GRID_NUM = grid_num;
+
     // nh.param("");
     nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
     odom_subscriber = nh.subscribe("/estimated_pose/pose", 10, &BEVImageGenerator::odom_callback, this);
-    // bev_image_publisher = nh.advertise<>("/bev/image", 10);
-    // bev_transformed_image_publisher = nh.advertise<>("/bev/transformed_image", 10);
 }
 
 

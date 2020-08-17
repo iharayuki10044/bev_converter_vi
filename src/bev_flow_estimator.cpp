@@ -30,8 +30,8 @@ void BEVFlowEstimator::executor(void)
         bev_image_generator.initializer();
 
 		if(grid_callback_flag){
-            cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img);
-            cropped_transformed_grid_img = bev_image_generator.cropped_transformed_grid_img_generator(pre_input_grid_img);
+            cv::Mat cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img);
+            cv::Mat cropped_transformed_grid_img = bev_image_generator.cropped_transformed_grid_img_generator(pre_input_grid_img);
             cv::Mat bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
 
 			first_flag = true;

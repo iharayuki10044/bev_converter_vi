@@ -23,7 +23,7 @@
 class BEVImageGenerator
 {
 	public:
-		BEVImageGenerator(void);
+		BEVImageGenerator(double, int);
 
         typedef struct Dynamics{
             float max_acceleration;
