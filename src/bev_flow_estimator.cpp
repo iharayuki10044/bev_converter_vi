@@ -32,7 +32,7 @@ void BEVFlowEstimator::executor(void)
 		if(grid_callback_flag){
             cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img);
             cropped_transformed_grid_img = bev_image_generator.cropped_transformed_grid_img_generator(pre_input_grid_img);
-
+            cv::Mat bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
 
 			first_flag = true;
 			grid_callback_flag = false;
@@ -90,6 +90,31 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 
     grid_callback_flag = true;
 }
+
+
+cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat& pre_img, cv::Mat& cur_img)
+{
+    Ptr<DenseOpticalFlowExt> optical_flow = superres::createOptFlow_DualTVL1();
+    cv::Mat flow_x, flow_y;
+    optical_flow->calc(pre_img, cur_img, flow_x, flow_y);
+
+    cv::Mat magnitude, angle;
+    cv::cartToPolar(flow_x, flow_y, magnitude, angle, true);
+    cv::Mat hsv_planes[3];
+    hsv_planes[0] = angle;
+    cv::normalize(magnitude, magnitude, 0, 1, NORM_MINMAX);
+    hsv_planes[1] = magnitude;
+    hsv_planes[2] = cv::Mat::ones(magnitude.size(), CV_32F);
+    
+    cv::Mat hsv;
+    cv::merge(hsv_planes, 3, hsv);
+
+    cv::Mat flow_bgr;
+    cvCvtColor(hsv, flow_bgr, cv::COLOR_HSV2BGR);
+
+    return flow_bgr;
+}
+
 
 
 
