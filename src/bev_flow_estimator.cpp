@@ -6,13 +6,11 @@ BEVFlowEstimator::BEVFlowEstimator(void)
     nh.param("RANGE", RANGE, {18.0});
     nh.param("GRID_NUM", GRID_NUM, {60});
     nh.param("Hz", Hz, {100.0});
+    nh.param("FLOW_IMAGE_SIZE", FLOW_IMAGE_SIZE, {60});
+    nh.param("SAVE_NUMBER", SAVE_NUMBER, {0});
     // nh.param("");
-    nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
     grid_subscriber = nh.subscribe("/bev/grid", 10, &BEVFlowEstimator::grid_callback, this);
-    odom_subscriber = nh.subscribe("/estimated_pose/pose", 10, &BEVFlowEstimator::odom_callback, this);
-    // bev_image_publisher = nh.advertise<>("/bev/image", 10);
-    // bev_transformed_image_publisher = nh.advertise<>("/bev/transformed_image", 10);
 }
 
 
@@ -22,20 +20,23 @@ void BEVFlowEstimator::executor(void)
     formatter();
     BEVImageGenerator bev_image_generator;
     bev_image_generator.formatter();
+    int i = 0;
 
 	ros::Rate r((int)Hz);
 	while(ros::ok()){
 		std::cout << "initializer" << std::endl;
-        initializer();
         bev_image_generator.initializer();
 
 		if(grid_callback_flag){
+            initializer();
             cv::Mat cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img);
             cv::Mat cropped_transformed_grid_img = bev_image_generator.cropped_transformed_grid_img_generator(pre_input_grid_img);
             cv::Mat bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
 
-			first_flag = true;
-			grid_callback_flag = false;
+            cv::resize(bev_flow, bev_flow, FLOW_IMAGE_SIZE);
+            cv::imwrite("bev_img\\data_" + std::to_string(SAVE_NUMBER) + "\\flow_" + std::to_string(i) + ".png", bev_flow);
+
+            i++;
 		}
 
 		r.sleep();
@@ -54,6 +55,8 @@ void BEVFlowEstimator::formatter(void)
 
 void BEVFlowEstimator::initializer(void)
 {
+    first_flag = true;
+    grid_callback_flag = false;
 }
 
 

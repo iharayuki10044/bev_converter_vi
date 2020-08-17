@@ -35,7 +35,7 @@ class BEVFlowEstimator
 		constexpr int Col = 0; //i↓  ...   ↑x
 		constexpr int Row = 1; //j→  ... y←o
 
-        int GRID_NUM, crop_size;
+        int GRID_NUM, SAVE_NUMBER, FLOW_IMAGE_SIZE, crop_size;
         double RANGE, Hz, grid_size, dt;
 
         ros::NodeHandle n;
@@ -52,8 +52,6 @@ class BEVFlowEstimator
 
         cv::Mat input_grid_img;
         cv::Mat pre_input_grid_img;
-        cv::Mat cropped_current_grid_img;
-        cv::Mat cropped_transformed_grid_img;
 
 };
 
