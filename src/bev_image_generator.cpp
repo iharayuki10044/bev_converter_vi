@@ -1,5 +1,7 @@
 #include "bev_converter/bev_image_generator.h"
 
+bool BEVImageGenerator::first_flag;
+
 BEVImageGenerator::BEVImageGenerator(double range, int grid_num)
 : nh("~")
 {
@@ -13,7 +15,7 @@ BEVImageGenerator::BEVImageGenerator(double range, int grid_num)
 }
 
 
-cv::Mat BEVImageGenerator::cropped_current_grid_img_generator(cv::Mat& src_img)
+cv::Mat BEVImageGenerator::cropped_current_grid_img_generator(cv::Mat src_img)
 {
     cv::Mat dst_img = image_cropper(src_img);
 
@@ -21,7 +23,7 @@ cv::Mat BEVImageGenerator::cropped_current_grid_img_generator(cv::Mat& src_img)
 }
 
 
-cv::Mat BEVImageGenerator::cropped_transformed_grid_img_generator(cv::Mat& src_img)
+cv::Mat BEVImageGenerator::cropped_transformed_grid_img_generator(cv::Mat src_img)
 {
     cv::Mat transformed_grid_img, dst_img;
 
@@ -33,8 +35,6 @@ cv::Mat BEVImageGenerator::cropped_transformed_grid_img_generator(cv::Mat& src_i
 
     return dst_img;
 }
-
-
 
 
 void BEVImageGenerator::odom_callback(const nav_msgs::OdometryConstPtr &msg)
@@ -84,6 +84,15 @@ void BEVImageGenerator::formatter(void)
     dt = 1.0 / Hz;
     grid_size = RANGE / GRID_NUM;
 
+	odom_callback_flag = false;
+	first_flag = false;
+
+	UnitVector = {{"unit_vector_o", 1},
+				  {"unit_vector_x", 2},
+				  {"unit_vector_y", 3}};
+	CropMode = {{"forward", 1},
+				{"rotate", 2}};
+
     robot_param.max_acceleration = ROBOT_PARAM["MAX_ACCELERATION"];
     robot_param.max_yawrate = ROBOT_PARAM["MAX_YAWRATE"];
     robot_param.max_d_yawrate = ROBOT_PARAM["MAX_D_YAWRATE"];
@@ -121,35 +130,32 @@ void BEVImageGenerator::initializer(void)
 
 Eigen::Vector2i BEVImageGenerator::cell_motion_calculator(std::string dim)
 {
-    switch(UnitVector[dim]){
+    Eigen::Vector3d src_unit_vector = Eigen::Vector3d::Zero();
+    
+	switch(UnitVector[dim]){
         case 1: // unit_vector_o
-            Eigen::Vector3d src_unit_vector << 0.0, 0.0, 1.0;
+            src_unit_vector << 0.0, 0.0, 1.0;
             break;
         case 2: // unit_vector_x
-            Eigen::Vector3d src_unit_vector << 1.0, 0.0, 1.0;
+            src_unit_vector << 1.0, 0.0, 1.0;
             break;
         case 3: // unit_vector_y
-            Eigen::Vector3d src_unit_vector << 0.0, 1.0, 1.0;
+            src_unit_vector << 0.0, 1.0, 1.0;
             break;
         default:
-            Eigen::Vector3d src_unit_vector = Eigen::Vector3d::Zero();
             break;
     }
 
-    Eigen::Vector3d homogenous_tf;
-    Eigen::Vector2i cell_movement
+    Eigen::Matrix3d homogenous_tf = Eigen::Matrix3d::Zero();
+    homogenous_tf << cos(d_my_odom.yaw), -sin(d_my_odom.yaw), d_my_odom.x / grid_size,
+				  	 sin(d_my_odom.yaw),  cos(d_my_odom.yaw), d_my_odom.y / grid_size,
+					 0.0,                 0.0,                0.0;
 
-    homogenous_tf(0, 0) = cos(d_my_odom.yaw);
-    homogenous_tf(0, 1) = -sin(d_my_odom.yaw);
-    homogenous_tf(1, 0) = sin(d_my_odom.yaw);
-    homogenous_tf(1, 1) = cos(d_my_odom.yaw);
-    homogenous_tf(0, 2) = d_my_odom.x / grid_size;
-    homogenous_tf(1, 2) = d_my_odom.y / grid_size;
-    homogenous_tf(2, 0) = 0.0;
-    homogenous_tf(2, 1) = 0.0;
-    homogenous_tf(2, 2) = 1.0;
+    Eigen::Vector3d cell_movement_;
+    cell_movement_ = homogenous_tf.colPivHouseholderQr().solve(src_unit_vector);    
 
-    cell_movement = (int)(homogenous_tf * src_unit_vector);    
+	Eigen::Vector2i cell_movement;
+	cell_movement << (int)cell_movement_[0], (int)cell_movement_[1];
 
     return cell_movement;
 }
@@ -163,25 +169,25 @@ void BEVImageGenerator::unit_vector_registrator(void)
 }
 
 
-cv::Mat BEVImageGenerator::image_transformer(cv::Mat& src_img)
+cv::Mat BEVImageGenerator::image_transformer(cv::Mat src_img)
 {
     unit_vector_registrator();
-    const Point2f src_pt[] = {Point2f(unit_vector.src.o[Col], unit_vector.src.o[Row]),
-                              Point2f(unit_vector.src.x[Col], unit_vector.src.x[Row]), 
-                              Point2f(unit_vector.src.y[Col], unit_vector.src.y[Row])};
-    const Point2f dst_pt[] = {Point2f(unit_vector.dst.o[Col], unit_vector.dst.o[Row]),
-                              Point2f(unit_vector.dst.x[Col], unit_vector.dst.x[Row]), 
-                              Point2f(unit_vector.dst.y[Col], unit_vector.dst.y[Row])};
-    const cv::Mat affine_matrix = getAffineTransform(src_pt, dst_pt);
+    const cv::Point2f src_pt[] = {cv::Point2f((float)unit_vector.src.o[Col], (float)unit_vector.src.o[Row]),
+    							  cv::Point2f((float)unit_vector.src.x[Col], (float)unit_vector.src.x[Row]), 
+    							  cv::Point2f((float)unit_vector.src.y[Col], (float)unit_vector.src.y[Row])};
+    const cv::Point2f dst_pt[] = {cv::Point2f((float)unit_vector.dst.o[Col], (float)unit_vector.dst.o[Row]),
+                    			  cv::Point2f((float)unit_vector.dst.x[Col], (float)unit_vector.dst.x[Row]), 
+                        		  cv::Point2f((float)unit_vector.dst.y[Col], (float)unit_vector.dst.y[Row])};
+    const cv::Mat affine_matrix = cv::getAffineTransform(src_pt, dst_pt);
     cv::Mat dst_img;
     cv::warpAffine(src_img, dst_img, affine_matrix, src_img.size(), CV_INTER_LINEAR, cv::BORDER_TRANSPARENT);
     
-    cv::line(src_img, src_pt[0], src_pt[1], Scalar(255,255,0), 2);
-    cv::line(src_img, src_pt[1], src_pt[2], Scalar(255,255,0), 2);
-    cv::line(src_img, src_pt[2], src_pt[0], Scalar(255,255,0), 2);
-    cv::line(src_img, dst_pt[0], dst_pt[1], Scalar(255,0,255), 2);
-    cv::line(src_img, dst_pt[1], dst_pt[2], Scalar(255,0,255), 2);
-    cv::line(src_img, dst_pt[2], dst_pt[0], Scalar(255,0,255), 2);
+    cv::line(src_img, src_pt[0], src_pt[1], cv::Scalar(255,255,0), 2);
+    cv::line(src_img, src_pt[1], src_pt[2], cv::Scalar(255,255,0), 2);
+    cv::line(src_img, src_pt[2], src_pt[0], cv::Scalar(255,255,0), 2);
+    cv::line(src_img, dst_pt[0], dst_pt[1], cv::Scalar(255,0,255), 2);
+    cv::line(src_img, dst_pt[1], dst_pt[2], cv::Scalar(255,0,255), 2);
+    cv::line(src_img, dst_pt[2], dst_pt[0], cv::Scalar(255,0,255), 2);
 
     cv::namedWindow("src", CV_WINDOW_AUTOSIZE);
     cv::namedWindow("dst", CV_WINDOW_AUTOSIZE);
@@ -193,7 +199,7 @@ cv::Mat BEVImageGenerator::image_transformer(cv::Mat& src_img)
 }
 
 
-cv::Mat BEVImageGenerator::image_cropper(cv::Mat& src_img)
+cv::Mat BEVImageGenerator::image_cropper(cv::Mat src_img)
 {
     cv::Rect roi(cv::Point(crop_size, crop_size), cv::Size(GRID_NUM - 2 * crop_size, GRID_NUM - 2 * crop_size));
     cv::Mat dst_img = src_img(roi);

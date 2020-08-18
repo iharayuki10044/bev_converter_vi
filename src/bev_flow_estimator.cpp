@@ -18,7 +18,7 @@ void BEVFlowEstimator::executor(void)
 {
 	std::cout << "formatter" << std::endl;
     formatter();
-    BEVImageGenerator bev_image_generator;
+    BEVImageGenerator bev_image_generator(RANGE, GRID_NUM);
     bev_image_generator.formatter();
     int i = 0;
 
@@ -33,7 +33,7 @@ void BEVFlowEstimator::executor(void)
             cv::Mat cropped_transformed_grid_img = bev_image_generator.cropped_transformed_grid_img_generator(pre_input_grid_img);
             cv::Mat bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
 
-            cv::resize(bev_flow, bev_flow, FLOW_IMAGE_SIZE);
+            cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
             cv::imwrite("bev_img\\data_" + std::to_string(SAVE_NUMBER) + "\\flow_" + std::to_string(i) + ".png", bev_flow);
 
             i++;
@@ -62,25 +62,19 @@ void BEVFlowEstimator::initializer(void)
 
 void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 {
-    bev_grid = *msg;
+	nav_msgs::OccupancyGrid bev_grid = *msg;
     
-    double yaw, pitch, roll;
-    geometry_msgs::Quaternion orientation = bev_grid.info.origin.orientation;
-    tf::Matrix3x3 mat(tf::Quaternion(orientation.x, orientation.y, orientation.z, orientation.w));
-    mat.getEulerYPR(yaw, pitch, roll);
-    double map_theta = yaw;
-
     if(first_flag){
         pre_input_grid_img = input_grid_img;
     }
     
-    input_grid_img = Mat::zeros(cv::Size(bev_grid.info.width,bev_grid.info.height), CV_8UC1);
+    input_grid_img = cv::Mat::zeros(cv::Size(bev_grid.info.width,bev_grid.info.height), CV_8UC1);
 
     for(unsigned int col = 0; col < bev_grid.info.height; col++){
         for(unsigned int row = 0; row < bev_grid.info.width; row++){
             unsigned int i = row + (bev_grid.info.height - col - 1) * bev_grid.info.width;
             int intensity = 205;
-            if(0 <= bev_grid.data[i] && brv_grid.data[i] <= 100){
+            if(0 <= bev_grid.data[i] && bev_grid.data[i] <= 100){
                 intensity = round((float)(100.0 - bev_grid.data[i]) * 2.55);
             }
             input_grid_img.at<unsigned char>(col, row) = intensity;
@@ -95,9 +89,9 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 }
 
 
-cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat& pre_img, cv::Mat& cur_img)
+cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 {
-    Ptr<DenseOpticalFlowExt> optical_flow = superres::createOptFlow_DualTVL1();
+	cv::Ptr<cv::DenseOpticalFlow> optical_flow = cv::superres::createOptFlow_DualTVL1();
     cv::Mat flow_x, flow_y;
     optical_flow->calc(pre_img, cur_img, flow_x, flow_y);
 
@@ -105,7 +99,9 @@ cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat& pre_img, cv::Mat& cur_img)
     cv::cartToPolar(flow_x, flow_y, magnitude, angle, true);
     cv::Mat hsv_planes[3];
     hsv_planes[0] = angle;
-    cv::normalize(magnitude, magnitude, 0, 1, NORM_MINMAX);
+    // cv::normalize(magnitude, magnitude, 0, 1, NORM_MINMAX);
+    cv::normalize(magnitude, magnitude, 0, 1, 32); // NORM_MINMAX    = 32 //!< flag
+    // cv::normalize(magnitude, magnitude, 0, 1, NORM_L1);
     hsv_planes[1] = magnitude;
     hsv_planes[2] = cv::Mat::ones(magnitude.size(), CV_32F);
     
@@ -113,7 +109,7 @@ cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat& pre_img, cv::Mat& cur_img)
     cv::merge(hsv_planes, 3, hsv);
 
     cv::Mat flow_bgr;
-    cvCvtColor(hsv, flow_bgr, cv::COLOR_HSV2BGR);
+	cv::cvtColor(hsv, flow_bgr, cv::COLOR_HSV2BGR);
 
     return flow_bgr;
 }

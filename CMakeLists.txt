@@ -32,6 +32,7 @@ if(OPENMP_FOUND)
 	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
+find_package(OpenCV REQUIRED)
 find_package(PCL 1.8 REQUIRED)
 find_package(Eigen3 REQUIRED COMPONENTS system)
 include_directories(${Eigen_INCLUDE_DIRS})

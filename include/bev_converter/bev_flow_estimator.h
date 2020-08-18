@@ -7,7 +7,9 @@
 #include <geometry_msgs/Pose.h>
 
 #include <opencv2/opencv.hpp>
+/* #include <opencv_lib.hpp> */
 #include <opencv2/superres/optical_flow.hpp>
+#include <opencv2/core/base.hpp>
 
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
@@ -16,7 +18,7 @@
 #include "Eigen/Dense"
 #include "Eigen/LU"
 
-#include "bev_image_generator"
+#include "bev_converter/bev_image_generator.h"
 
 class BEVFlowEstimator
 {
@@ -27,15 +29,16 @@ class BEVFlowEstimator
         void formatter(void);
         void initializer(void);
 		void grid_callback(const nav_msgs::OccupancyGridConstPtr&);
-        cv::Mat flow_estimator(cv::Mat&, cv::Mat&);
+        cv::Mat flow_estimator(cv::Mat, cv::Mat);
 
 	private:
 		bool first_flag = false;
+		bool grid_callback_flag;
 
-		constexpr int Col = 0; //i↓  ...   ↑x
-		constexpr int Row = 1; //j→  ... y←o
+		constexpr static int Col = 0; //i↓  ...   ↑x
+		constexpr static int Row = 1; //j→  ... y←o
 
-        int GRID_NUM, SAVE_NUMBER, FLOW_IMAGE_SIZE, crop_size;
+        int GRID_NUM, SAVE_NUMBER, FLOW_IMAGE_SIZE, FLOW_WINiDOW_SIZE, crop_size;
         double RANGE, Hz, grid_size, dt;
 
         ros::NodeHandle n;
