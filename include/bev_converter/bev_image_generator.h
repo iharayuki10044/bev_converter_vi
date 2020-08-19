@@ -71,7 +71,6 @@ class BEVImageGenerator
 		constexpr static int Row = 1; //j→  ... y←o
         // constexpr int UV_O = 0, int UV_X = 1, int UV_Y = 2; // uv : unit vector
         static std::map<std::string, int> UnitVector;
-        static std::map<std::string, int> CropMode;
 
         int GRID_NUM;
         static int crop_size;

@@ -1,6 +1,17 @@
 #include "bev_converter/bev_image_generator.h"
 
 bool BEVImageGenerator::first_flag;
+bool BEVImageGenerator::odom_callback_flag;
+int BEVImageGenerator::crop_size;
+double BEVImageGenerator::dt;
+double BEVImageGenerator::Hz;
+double BEVImageGenerator::grid_size;
+std::map<std::string, int> BEVImageGenerator::UnitVector;
+MyOdom BEVImageGenerator::now_my_odom;
+MyOdom BEVImageGenerator::pre_my_odom;
+UnitVectorOXY BEVImageGenerator::unit_vector;
+Dynamics BEVImageGenerator::robot_param;
+
 
 BEVImageGenerator::BEVImageGenerator(double range, int grid_num)
 : nh("~")
@@ -90,8 +101,6 @@ void BEVImageGenerator::formatter(void)
 	UnitVector = {{"unit_vector_o", 1},
 				  {"unit_vector_x", 2},
 				  {"unit_vector_y", 3}};
-	CropMode = {{"forward", 1},
-				{"rotate", 2}};
 
     robot_param.max_acceleration = ROBOT_PARAM["MAX_ACCELERATION"];
     robot_param.max_yawrate = ROBOT_PARAM["MAX_YAWRATE"];
