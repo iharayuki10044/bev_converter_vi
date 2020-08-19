@@ -91,9 +91,16 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 
 cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 {
-	cv::Ptr<cv::superres::DenseOpticalFlowExt> optical_flow = cv::superres::createOptFlow_DualTVL1();
-    cv::Mat flow_x, flow_y;
-    optical_flow->calc(pre_img, cur_img, flow_x, flow_y);
+	// cv::Ptr<cv::superres::DenseOpticalFlowExt> optical_flow = cv::superres::createOptFlow_DualTVL1();
+    // cv::Mat flow_x, flow_y;
+    // optical_flow->calc(pre_img, cur_img, flow_x, flow_y);
+
+    cv::Mat flow;
+    calcOpticalFlowFarneback(pre_img, cur_img, flow, 0.5, 10, 15, 3, 5, 1.1, 0);
+    cv::Mat channels[2], flow_x, flow_y;
+    cv::split(flow, channels);
+    flow_x = channels[0];
+    flow_y = channels[1];
 
     cv::Mat magnitude, angle;
     cv::cartToPolar(flow_x, flow_y, magnitude, angle, true);
