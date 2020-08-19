@@ -34,8 +34,16 @@ void BEVFlowEstimator::executor(void)
             cv::Mat bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
 
             cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
-            cv::imwrite("./bev_img/data_" + std::to_string(SAVE_NUMBER) + "/flow_" + std::to_string(i) + ".png", bev_flow);
+			bev_flow.convertTo(bev_flow, CV_8U, 255);
 
+			cv::namedWindow("bev_flow", CV_WINDOW_AUTOSIZE);
+			cv::imshow("bev_flow", bev_flow);
+			cv::waitKey(10);
+            
+			cv::imwrite("/home/amsl/ros_catkin_ws/src/bev_converter/bev_img/data_" + std::to_string(SAVE_NUMBER) + "/flow_" + std::to_string(i) + ".jpg", bev_flow);
+            cv::imwrite("bev_flow.jpg", bev_flow);
+
+			std::cout << "SAVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
             i++;
 		}
 
