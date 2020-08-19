@@ -18,7 +18,6 @@ BEVFlowEstimator::BEVFlowEstimator(void)
 
 void BEVFlowEstimator::executor(void)
 {
-	std::cout << "formatter" << std::endl;
     formatter();
     BEVImageGenerator bev_image_generator(RANGE, GRID_NUM, MANUAL_CROP_SIZE, ROBOT_PARAM);
     bev_image_generator.formatter();
@@ -26,7 +25,6 @@ void BEVFlowEstimator::executor(void)
 
 	ros::Rate r((int)Hz);
 	while(ros::ok()){
-		std::cout << "initializer" << std::endl;
         bev_image_generator.initializer();
 
 		if(grid_callback_flag){
@@ -50,6 +48,8 @@ void BEVFlowEstimator::executor(void)
 
 void BEVFlowEstimator::formatter(void)
 {
+	std::cout << "formatter" << std::endl;
+
     dt = 1.0 / Hz;
     grid_size = RANGE / GRID_NUM;
 }
@@ -57,6 +57,8 @@ void BEVFlowEstimator::formatter(void)
 
 void BEVFlowEstimator::initializer(void)
 {
+	std::cout << "initializer" << std::endl;
+
     first_flag = true;
     grid_callback_flag = false;
 }
@@ -64,6 +66,8 @@ void BEVFlowEstimator::initializer(void)
 
 void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 {
+	std::cout << "grid_callback" << std::endl;
+
 	nav_msgs::OccupancyGrid bev_grid = *msg;
     
     if(first_flag){
@@ -93,6 +97,8 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 
 cv::Mat BEVFlowEstimator::flow_estimator(const cv::Mat &pre_img, const cv::Mat &cur_img)
 {
+	std::cout << "flow_estimator" << std::endl;
+
 	cv::Ptr<cv::superres::DenseOpticalFlowExt> optical_flow = cv::superres::createOptFlow_DualTVL1();
     cv::Mat flow_x, flow_y;
     optical_flow->calc(pre_img, cur_img, flow_x, flow_y);
