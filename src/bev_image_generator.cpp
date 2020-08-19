@@ -215,11 +215,6 @@ cv::Mat BEVImageGenerator::image_transformer(cv::Mat src_img)
     cv::line(src_img, dst_pt[1], dst_pt[2], cv::Scalar(255,0,255), 2);
     cv::line(src_img, dst_pt[2], dst_pt[0], cv::Scalar(255,0,255), 2);
 
-    /* cv::namedWindow("src", CV_WINDOW_AUTOSIZE); */
-    /* cv::namedWindow("dst", CV_WINDOW_AUTOSIZE); */
-    /* cv::imshow("src", src_img); */
-    /* cv::imshow("dst", dst_img); */
-    /* cv::waitKey(1000*(int)dt); */
 
     return dst_img;
 }
