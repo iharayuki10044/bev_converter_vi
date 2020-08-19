@@ -13,16 +13,16 @@ BEVImageGenerator::UnitVectorOXY BEVImageGenerator::unit_vector;
 BEVImageGenerator::Dynamics BEVImageGenerator::robot_param;
 
 
-BEVImageGenerator::BEVImageGenerator(double range, int grid_num)
+BEVImageGenerator::BEVImageGenerator(double range, int grid_num, int manual_crop_size, XmlRpc::XmlRpcValue robot_param)
 : nh("~")
 {
     RANGE = range;
     GRID_NUM = grid_num;
-
+	MANUAL_CROP_SIZE = manual_crop_size;
+	ROBOT_PARAM = robot_param;
     // nh.param("");
-    nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
-    odom_subscriber = nh.subscribe("/estimated_pose/pose", 10, &BEVImageGenerator::odom_callback, this);
+    odom_subscriber = nh.subscribe("/odom", 10, &BEVImageGenerator::odom_callback, this);
 }
 
 

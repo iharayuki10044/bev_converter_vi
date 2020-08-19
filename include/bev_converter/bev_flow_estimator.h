@@ -32,13 +32,15 @@ class BEVFlowEstimator
         cv::Mat flow_estimator(const cv::Mat&, const cv::Mat&);
 
 	private:
+        XmlRpc::XmlRpcValue ROBOT_PARAM;
+
 		bool first_flag = false;
 		bool grid_callback_flag;
 
 		constexpr static int Col = 0; //i↓  ...   ↑x
 		constexpr static int Row = 1; //j→  ... y←o
 
-        int GRID_NUM, SAVE_NUMBER, FLOW_IMAGE_SIZE, FLOW_WINiDOW_SIZE, crop_size;
+        int GRID_NUM, SAVE_NUMBER, FLOW_IMAGE_SIZE, FLOW_WINiDOW_SIZE, crop_size, MANUAL_CROP_SIZE;
         double RANGE, Hz, grid_size, dt;
 
         ros::NodeHandle n;

@@ -6,10 +6,8 @@
 	<param name="use_sim_time" value="true"/>
 	
 	<node pkg="bev_converter" type="bev_converter" name="bev_converter" output="screen">
-		<param name="WIDTH" value="$(arg max_range)" type="double"/>
-		<param name="HEIGHT" value="$(arg max_range)" type="double"/>
-		<param name="GRID_NUM_X" value="$(arg grid_num)" type="int"/>
-		<param name="GRID_NUM_Y" value="$(arg grid_num)" type="int"/>
+		<param name="RANGE" value="$(arg max_range)" type="double"/>
+		<param name="GRID_NUM" value="$(arg grid_num)" type="int"/>
 		<param name="Hz" value="$(arg hz)" type="double"/>
 	</node>
 

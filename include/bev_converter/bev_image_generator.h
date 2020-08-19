@@ -23,7 +23,7 @@
 class BEVImageGenerator
 {
 	public:
-		BEVImageGenerator(double, int);
+		BEVImageGenerator(double, int, int, XmlRpc::XmlRpcValue);
 
         typedef struct dynamics{
             double max_acceleration;
@@ -72,7 +72,7 @@ class BEVImageGenerator
         // constexpr int UV_O = 0, int UV_X = 1, int UV_Y = 2; // uv : unit vector
         static std::map<std::string, int> UnitVector;
 
-        int GRID_NUM;
+        int GRID_NUM, MANUAL_CROP_SIZE;
         static int crop_size;
         double RANGE;
         static double Hz, dt, grid_size;

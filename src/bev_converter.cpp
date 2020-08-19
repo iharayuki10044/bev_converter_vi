@@ -3,10 +3,8 @@
 BEVConverter::BEVConverter(void)
 : nh("~")
 {
-    nh.param("WIDTH", WIDTH, {18.0});
-    nh.param("HEIGHT", HEIGHT, {18.0});
-    nh.param("GRID_NUM_X", GRID_NUM_X, {60});
-    nh.param("GRID_NUM_Y", GRID_NUM_Y, {60});
+    nh.param("RANGE", RANGE, {18.0});
+    nh.param("GRID_NUM", GRID_NUM, {60});
     nh.param("Hz", Hz, {100.0});
     // nh.param("");
     
@@ -25,24 +23,6 @@ void BEVConverter::execution(void)
 	while(ros::ok()){
 		/* std::cout << "initializer" << std::endl; */
         initializer();
-
-    	/* Eigen::Affine3d affine_transform; */
-		/* try{ */
-        /* 	tf::StampedTransform stamped_transform; */
-        /* 	listener.lookupTransform("/odom", "/velodyne", ros::Time(0), stamped_transform); */
-		/* 	Eigen::Translation<double, 3> t(stamped_transform.getOrigin().x(), stamped_transform.getOrigin().y(), stamped_transform.getOrigin().z()); */
-		/* 	Eigen::Quaterniond q(stamped_transform.getRotation().w(), stamped_transform.getRotation().x(), stamped_transform.getRotation().y(), stamped_transform.getRotation().z()); */
-		/* 	affine_transform = q * t; */
-		/* 	tf_listen_flag = true; */
-     	/* }    */
-     	/* catch (tf::TransformException ex){ */
-       	/* 	ROS_ERROR("%s",ex.what()); */
-       	/* 	ros::Duration(1.0).sleep(); */
-    	/* } */
-		/* if(pc_callback_flag && odom_callback_flag && tf_listen_flag){ */
-		/* 	#<{(| std::cout << "transform point cloud" << std::endl; |)}># */
-        /* 	pcl::transformPointCloud(*pcl_filtered_pc, *pcl_transformed_pc, affine_transform); */
-		/* } */
 
 		if(pc_callback_flag && odom_callback_flag){
 			/* std::cout << "converter" << std::endl; */
@@ -83,7 +63,7 @@ pcl::PointCloud<PointI>::Ptr BEVConverter::pc_downsampling(pcl::PointCloud<Point
     pcl::VoxelGrid<pcl::PointXYZI> sor;
 
     sor.setInputCloud(pcl_input_pc_);
-    sor.setLeafSize(grid_size_x, grid_size_y, grid_size_z);
+    sor.setLeafSize(grid_size, grid_size, grid_size);
     sor.filter(*pcl_filtered_pc_);
 
 	/* pcl::PassThrough<PointI> pass; */
@@ -114,17 +94,15 @@ void BEVConverter::formatter(void)
 {
     bev_grid.header.seq = 0;
     bev_grid.header.frame_id = "velodyne";
-    bev_grid.info.resolution = (float)(WIDTH / GRID_NUM_X);
-    bev_grid.info.width = GRID_NUM_X;
-    bev_grid.info.height = GRID_NUM_Y;
+    bev_grid.info.resolution = (float)(RANGE / GRID_NUM);
+    bev_grid.info.width = GRID_NUM;
+    bev_grid.info.height = GRID_NUM;
     bev_grid.info.origin = odom.pose.pose;
-    bev_grid.info.origin.position.x = odom.pose.pose.position.x - 0.5 * WIDTH;
-    bev_grid.info.origin.position.y = odom.pose.pose.position.y - 0.5 * HEIGHT;
-    bev_grid.data.resize(GRID_NUM_X * GRID_NUM_Y);
+    bev_grid.info.origin.position.x = odom.pose.pose.position.x - 0.5 * RANGE;
+    bev_grid.info.origin.position.y = odom.pose.pose.position.y - 0.5 * RANGE;
+    bev_grid.data.resize(GRID_NUM * GRID_NUM);
 
-    grid_size_x = WIDTH / GRID_NUM_X;
-    grid_size_y = HEIGHT / GRID_NUM_Y;
-    grid_size_z = 0.5 * (grid_size_x + grid_size_y);
+    grid_size = RANGE / GRID_NUM;
 }
 
 
@@ -141,10 +119,10 @@ void BEVConverter::converter(void)
     /* for(auto& pt : pcl_transformed_pc->points){ */
     /* for(auto& pt : pcl_filtered_pc->points){ */
     for(auto& pt : pcl_input_pc->points){
-        int ix = floor((pt.x + 0.5 * WIDTH) / grid_size_x);
-        int iy = floor((pt.y + 0.5 * HEIGHT) / grid_size_y);
-        int index = ix + iy * (WIDTH / grid_size_x);
-        if((0 <= ix && ix < GRID_NUM_X) && (0 <= iy && iy < GRID_NUM_Y)){
+        int ix = floor((pt.x + 0.5 * RANGE) / grid_size);
+        int iy = floor((pt.y + 0.5 * RANGE) / grid_size);
+        int index = ix + iy * (RANGE / grid_size);
+        if((0 <= ix && ix < GRID_NUM) && (0 <= iy && iy < GRID_NUM)){
 			/* std::cout << "[ix, iy] = [" << ix << ", " << iy << "]" << std::endl; */
             bev_grid.data[index] = (int)Occupied;
         }

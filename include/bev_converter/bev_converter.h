@@ -48,9 +48,9 @@ class BEVConverter
 
 		double Hz;
 
-        double WIDTH, HEIGHT; // x, y;
-        int GRID_NUM_X, GRID_NUM_Y;
-        float grid_size_x, grid_size_y, grid_size_z;
+        double RANGE;
+        int GRID_NUM;
+        float grid_size;
 
         ros::NodeHandle n;
         ros::NodeHandle nh;

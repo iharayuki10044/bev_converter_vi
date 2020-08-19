@@ -8,7 +8,9 @@ BEVFlowEstimator::BEVFlowEstimator(void)
     nh.param("Hz", Hz, {100.0});
     nh.param("FLOW_IMAGE_SIZE", FLOW_IMAGE_SIZE, {60});
     nh.param("SAVE_NUMBER", SAVE_NUMBER, {0});
+    nh.param("MANUAL_CROP_SIZE", MANUAL_CROP_SIZE, {10});
     // nh.param("");
+    nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
     grid_subscriber = nh.subscribe("/bev/grid", 10, &BEVFlowEstimator::grid_callback, this);
 }
@@ -18,7 +20,7 @@ void BEVFlowEstimator::executor(void)
 {
 	std::cout << "formatter" << std::endl;
     formatter();
-    BEVImageGenerator bev_image_generator(RANGE, GRID_NUM);
+    BEVImageGenerator bev_image_generator(RANGE, GRID_NUM, MANUAL_CROP_SIZE, ROBOT_PARAM);
     bev_image_generator.formatter();
     int i = 0;
 
