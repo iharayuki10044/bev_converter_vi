@@ -7,10 +7,10 @@ double BEVImageGenerator::dt;
 double BEVImageGenerator::Hz;
 double BEVImageGenerator::grid_size;
 std::map<std::string, int> BEVImageGenerator::UnitVector;
-MyOdom BEVImageGenerator::now_my_odom;
-MyOdom BEVImageGenerator::pre_my_odom;
-UnitVectorOXY BEVImageGenerator::unit_vector;
-Dynamics BEVImageGenerator::robot_param;
+BEVImageGenerator::MyOdom BEVImageGenerator::now_my_odom;
+BEVImageGenerator::MyOdom BEVImageGenerator::pre_my_odom;
+BEVImageGenerator::UnitVectorOXY BEVImageGenerator::unit_vector;
+BEVImageGenerator::Dynamics BEVImageGenerator::robot_param;
 
 
 BEVImageGenerator::BEVImageGenerator(double range, int grid_num)
