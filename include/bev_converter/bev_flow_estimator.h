@@ -29,7 +29,7 @@ class BEVFlowEstimator
         void formatter(void);
         void initializer(void);
 		void grid_callback(const nav_msgs::OccupancyGridConstPtr&);
-        cv::Mat flow_estimator(cv::Mat, cv::Mat);
+        cv::Mat flow_estimator(const cv::Mat&, const cv::Mat&);
 
 	private:
 		bool first_flag = false;

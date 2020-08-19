@@ -29,8 +29,8 @@ void BEVFlowEstimator::executor(void)
 
 		if(grid_callback_flag){
             initializer();
-            cv::Mat cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img);
-            cv::Mat cropped_transformed_grid_img = bev_image_generator.cropped_transformed_grid_img_generator(pre_input_grid_img);
+            const cv::Mat cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img);
+            const cv::Mat cropped_transformed_grid_img = bev_image_generator.cropped_transformed_grid_img_generator(pre_input_grid_img);
             cv::Mat bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
 
             cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
@@ -89,7 +89,7 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 }
 
 
-cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
+cv::Mat BEVFlowEstimator::flow_estimator(const cv::Mat &pre_img, const cv::Mat &cur_img)
 {
 	// cv::Ptr<cv::superres::DenseOpticalFlowExt> optical_flow = cv::superres::createOptFlow_DualTVL1();
     // cv::Mat flow_x, flow_y;
