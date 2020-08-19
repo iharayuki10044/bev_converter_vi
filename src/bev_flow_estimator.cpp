@@ -96,7 +96,7 @@ cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
     // optical_flow->calc(pre_img, cur_img, flow_x, flow_y);
 
     cv::Mat flow;
-    calcOpticalFlowFarneback(pre_img, cur_img, flow, 0.5, 10, 15, 3, 5, 1.1, 0);
+    cv::calcOpticalFlowFarneback(pre_img, cur_img, flow, 0.5, 10, 15, 3, 5, 1.1, 0);
     cv::Mat channels[2], flow_x, flow_y;
     cv::split(flow, channels);
     flow_x = channels[0];
