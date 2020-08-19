@@ -34,7 +34,7 @@ void BEVFlowEstimator::executor(void)
             cv::Mat bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
 
             cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
-            cv::imwrite("bev_img\\data_" + std::to_string(SAVE_NUMBER) + "\\flow_" + std::to_string(i) + ".png", bev_flow);
+            cv::imwrite("./bev_img/data_" + std::to_string(SAVE_NUMBER) + "/flow_" + std::to_string(i) + ".png", bev_flow);
 
             i++;
 		}
