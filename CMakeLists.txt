@@ -32,6 +32,7 @@ if(OPENMP_FOUND)
 	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
+find_package(Boost REQUIRED COMPONENTS)
 find_package(OpenCV REQUIRED)
 find_package(PCL 1.8 REQUIRED)
 find_package(Eigen3 REQUIRED COMPONENTS system)
@@ -138,6 +139,7 @@ include_directories(
     include
 	${catkin_INCLUDE_DIRS}
 	${PCL_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
 )
 
 link_directories(
@@ -196,18 +198,21 @@ add_dependencies(bev_flow_estimator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin
 target_link_libraries(bev_converter
 	${catkin_LIBRARIES}
 	${PCL_LIBRARIES}
+    ${OpenCV_LIBS}
     libbev_converter
 )
 
 target_link_libraries(bev_converter_v2
 	${catkin_LIBRARIES}
 	${PCL_LIBRARIES}
+    ${OpenCV_LIBS}
     libbev_converter_v2
 )
 
 target_link_libraries(bev_flow_estimator
 	${catkin_LIBRARIES}
 	${PCL_LIBRARIES}
+    ${OpenCV_LIBS}
     libbev_flow_estimator
 )
 #############
