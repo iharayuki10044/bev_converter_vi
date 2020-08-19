@@ -111,15 +111,17 @@ void BEVImageGenerator::formatter(void)
 
     int crop_size_forward = (int)(robot_param.wheel_radius * robot_param.max_wheel_angular_velocyty * dt / grid_size);
     int crop_size_rotate = (int)(0.5 * RANGE * tan(robot_param.max_yawrate * dt) / grid_size);
-    if(crop_size_forward < crop_size_rotate){
+    if(0 < crop_size_forward && crop_size_forward < crop_size_rotate){
         crop_size = crop_size_rotate;
         std::cout << "crop mode : rotate" << std::endl;
         std::cout << "crop_size : " << crop_size_rotate << std::endl;
-    }else{
+    }else if(0 < crop_size_rotate && crop_size_rotate < crop_size_forward){
         crop_size = crop_size_forward;
         std::cout << "crop mode : forward" << std::endl;
         std::cout << "crop_size : " << crop_size_forward << std::endl;
-    }
+    }else{
+		crop_size = MANUAL_CROP_SIZE;
+	}
 
     unit_vector.src.o[Col] = GRID_NUM / 2;
     unit_vector.src.o[Row] = GRID_NUM / 2;
