@@ -41,7 +41,7 @@ void BEVFlowEstimator::executor(void)
 			cv::waitKey(10);
             
 			cv::imwrite("/home/amsl/ros_catkin_ws/src/bev_converter/bev_img/data_" + std::to_string(SAVE_NUMBER) + "/flow_" + std::to_string(i) + ".jpg", bev_flow);
-            cv::imwrite("bev_flow.jpg", bev_flow);
+            cv::imwrite("bev_flow.png", bev_flow);
 
 			std::cout << "SAVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
             i++;

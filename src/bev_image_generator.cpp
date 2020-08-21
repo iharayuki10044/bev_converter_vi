@@ -198,12 +198,18 @@ cv::Mat BEVImageGenerator::image_transformer(cv::Mat src_img)
 	std::cout << "BEVImageGenerator::image_transformer" << std::endl;
 
     unit_vector_registrator();
-    const cv::Point2f src_pt[] = {cv::Point2f((float)unit_vector.src.o[Col], (float)unit_vector.src.o[Row]),
-    							  cv::Point2f((float)unit_vector.src.x[Col], (float)unit_vector.src.x[Row]), 
-    							  cv::Point2f((float)unit_vector.src.y[Col], (float)unit_vector.src.y[Row])};
-    const cv::Point2f dst_pt[] = {cv::Point2f((float)unit_vector.dst.o[Col], (float)unit_vector.dst.o[Row]),
-                    			  cv::Point2f((float)unit_vector.dst.x[Col], (float)unit_vector.dst.x[Row]), 
-                        		  cv::Point2f((float)unit_vector.dst.y[Col], (float)unit_vector.dst.y[Row])};
+    const cv::Point2f src_pt[] = {cv::Point2f(-(float)unit_vector.src.o[Col], -(float)unit_vector.src.o[Row]),
+    							  cv::Point2f(-(float)unit_vector.src.x[Col], -(float)unit_vector.src.x[Row]), 
+    							  cv::Point2f(-(float)unit_vector.src.y[Col], -(float)unit_vector.src.y[Row])};
+    const cv::Point2f dst_pt[] = {cv::Point2f(-(float)unit_vector.dst.o[Col], -(float)unit_vector.dst.o[Row]),
+                    			  cv::Point2f(-(float)unit_vector.dst.x[Col], -(float)unit_vector.dst.x[Row]), 
+                        		  cv::Point2f(-(float)unit_vector.dst.y[Col], -(float)unit_vector.dst.y[Row])};
+    /* const cv::Point2f src_pt[] = {cv::Point2f((float)unit_vector.src.o[Col], (float)unit_vector.src.o[Row]), */
+    /* 							  cv::Point2f((float)unit_vector.src.x[Col], (float)unit_vector.src.x[Row]),  */
+    /* 							  cv::Point2f((float)unit_vector.src.y[Col], (float)unit_vector.src.y[Row])}; */
+    /* const cv::Point2f dst_pt[] = {cv::Point2f((float)unit_vector.dst.o[Col], (float)unit_vector.dst.o[Row]), */
+    /*                 			  cv::Point2f((float)unit_vector.dst.x[Col], (float)unit_vector.dst.x[Row]),  */
+    /*                     		  cv::Point2f((float)unit_vector.dst.y[Col], (float)unit_vector.dst.y[Row])}; */
     const cv::Mat affine_matrix = cv::getAffineTransform(src_pt, dst_pt);
     cv::Mat dst_img;
     cv::warpAffine(src_img, dst_img, affine_matrix, src_img.size(), CV_INTER_LINEAR, cv::BORDER_TRANSPARENT);
