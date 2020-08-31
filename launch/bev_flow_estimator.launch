@@ -3,6 +3,7 @@
     <arg name="grid_num" default="60"/>
     <arg name="hz" default="100.0"/>
     <arg name="crop" default="10"/>
+    <arg name="save_data_num" default="2"/>
 
 	<param name="use_sim_time" value="true"/>
 	
@@ -17,6 +18,7 @@
 		<param name="GRID_NUM" value="$(arg grid_num)" type="int"/>
 		<param name="Hz" value="$(arg hz)" type="double"/>
 		<param name="MANUAL_CROP_SIZE" value="$(arg crop)" type="int"/>
+		<param name="SAVE_NUMBER" value="$(arg save_data_num)" type="int"/>
         <rosparam command="load" file="$(find cats)/config/cats_motion_param.yaml"/>
 	</node>
 

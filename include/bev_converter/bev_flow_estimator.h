@@ -1,6 +1,9 @@
 #ifndef __BEV_FLOW_ESTIMATOR_H
 #define __BEV_FLOW_ESTIMATOR_H
 
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include <ros/ros.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/Odometry.h>
