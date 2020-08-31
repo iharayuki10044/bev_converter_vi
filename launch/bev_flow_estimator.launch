@@ -1,6 +1,6 @@
 <launch>
     <arg name="range" default="18.0"/>
-    <arg name="grid_num" default="60"/>
+    <arg name="grid_num" default="180"/>
     <arg name="hz" default="100.0"/>
     <arg name="crop" default="10"/>
 

@@ -12,7 +12,8 @@ BEVFlowEstimator::BEVFlowEstimator(void)
     // nh.param("");
     nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
-    grid_subscriber = nh.subscribe("/bev/grid", 10, &BEVFlowEstimator::grid_callback, this);
+    /* grid_subscriber = nh.subscribe("/bev/grid", 10, &BEVFlowEstimator::grid_callback, this); */
+    grid_subscriber = nh.subscribe("/dynamic_cloud_detector/occupancy_grid", 10, &BEVFlowEstimator::grid_callback, this);
 }
 
 
