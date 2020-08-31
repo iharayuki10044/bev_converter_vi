@@ -155,9 +155,6 @@ add_definitions(
 add_library(libbev_converter
   src/bev_converter.cpp
 )
-add_library(libbev_converter_v2
-  src/bev_converter_v2.cpp
-)
 add_library(libbev_flow_estimator
   src/bev_flow_estimator.cpp
 )
@@ -167,14 +164,12 @@ add_library(libbev_flow_estimator
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(libbev_converter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(libbev_converter_v2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(libbev_flow_estimator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(bev_converter src/bev_converter_node.cpp src/bev_converter.cpp)
-add_executable(bev_converter_v2 src/bev_converter_node_v2.cpp src/bev_converter_node_v2.cpp)
 add_executable(bev_flow_estimator src/bev_flow_estimator_node.cpp src/bev_flow_estimator.cpp src/bev_image_generator.cpp)
 
 ## Rename C++ executable without prefix
@@ -187,7 +182,6 @@ add_executable(bev_flow_estimator src/bev_flow_estimator_node.cpp src/bev_flow_e
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(bev_converter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(bev_converter_v2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(bev_flow_estimator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
@@ -200,13 +194,6 @@ target_link_libraries(bev_converter
 	${PCL_LIBRARIES}
     ${OpenCV_LIBS}
     libbev_converter
-)
-
-target_link_libraries(bev_converter_v2
-	${catkin_LIBRARIES}
-	${PCL_LIBRARIES}
-    ${OpenCV_LIBS}
-    libbev_converter_v2
 )
 
 target_link_libraries(bev_flow_estimator
