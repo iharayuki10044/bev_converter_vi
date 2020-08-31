@@ -35,7 +35,7 @@ void BEVFlowEstimator::executor(void)
             cv::Mat bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
 
             cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
-			cv::rotate(image, image, cv::ROTATE_90_COUNTERCLOCKWISE);
+			cv::rotate(bev_flow, bev_flow, cv::ROTATE_90_COUNTERCLOCKWISE);
 
 			bev_flow.convertTo(bev_flow, CV_8U, 255);
 
