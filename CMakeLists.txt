@@ -171,6 +171,7 @@ add_dependencies(libbev_flow_estimator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${cat
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(bev_converter src/bev_converter_node.cpp src/bev_converter.cpp)
 add_executable(bev_flow_estimator src/bev_flow_estimator_node.cpp src/bev_flow_estimator.cpp src/bev_image_generator.cpp)
+add_executable(pointcloud_converter src/pointcloud_converter.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -195,12 +196,15 @@ target_link_libraries(bev_converter
     ${OpenCV_LIBS}
     libbev_converter
 )
-
 target_link_libraries(bev_flow_estimator
 	${catkin_LIBRARIES}
 	${PCL_LIBRARIES}
     ${OpenCV_LIBS}
     libbev_flow_estimator
+)
+target_link_libraries(pointcloud_converter
+	${catkin_LIBRARIES}
+	${PCL_LIBRARIES}
 )
 #############
 ## Install ##

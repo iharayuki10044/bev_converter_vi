@@ -68,9 +68,6 @@ class BEVConverter
         CloudIPtr pcl_input_pc{new CloudI()};
         CloudIPtr pcl_filtered_pc {new CloudI()};
         CloudIPtr pcl_transformed_pc {new CloudI()};
-
-        // Eigen::Vector3f zero_vector = Eigen::Vector3f::Zero();
-
 };
 
 #endif// __BEV_CONVERTER_H
