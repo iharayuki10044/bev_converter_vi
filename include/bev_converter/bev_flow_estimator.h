@@ -42,7 +42,8 @@ class BEVFlowEstimator
 
 		constexpr static int Col = 0; //i↓  ...   ↑x
 		constexpr static int Row = 1; //j→  ... y←o
-
+		
+		std::string PKG_PATH;
         int GRID_NUM, SAVE_NUMBER, FLOW_IMAGE_SIZE, FLOW_WINiDOW_SIZE, crop_size, MANUAL_CROP_SIZE;
         double RANGE, Hz, grid_size, dt;
 

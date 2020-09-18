@@ -1,30 +1,33 @@
 <launch>
-	<include file="$(find private_repository)/launch/export_rosmaster.launch"/>
-
-	<group ns="bev_converter">
-		<arg name="range" default="18.0"/>
-		<arg name="grid_num" default="60"/>
-		<arg name="hz" default="100.0"/>
-		<arg name="crop" default="10"/>
-		<arg name="save_data_num" default="2"/>
-
-		<!-- <param name="use_sim_time" value="true"/> -->
-		
-		<node pkg="bev_converter" type="bev_converter" name="bev_converter" output="screen">
-			<param name="RANGE" value="$(arg range)" type="double"/>
-			<param name="GRID_NUM" value="$(arg grid_num)" type="int"/>
-			<param name="Hz" value="$(arg hz)" type="double"/>
-		</node>
-
-		<node pkg="bev_converter" type="bev_flow_estimator" name="bev_flow_estimator" output="screen">
-			<param name="RANGE" value="$(arg range)" type="double"/>
-			<param name="GRID_NUM" value="$(arg grid_num)" type="int"/>
-			<param name="Hz" value="$(arg hz)" type="double"/>
-			<param name="MANUAL_CROP_SIZE" value="$(arg crop)" type="int"/>
-			<param name="SAVE_NUMBER" value="$(arg save_data_num)" type="int"/>
-			<rosparam command="load" file="$(find cats)/config/cats_motion_param.yaml"/>
-		</node>
-
-		<node pkg="rviz" name="rviz" type="rviz" args="-d /home/amsl/.rviz/bev.rviz"/>
+	<group ns="pedsim_ros">
+		<include file="$(find private_repository)/launch/export_pedsim_teb.launch"/>
 	</group>
+
+
+	<!-- <group ns="bev_converter"> -->
+	<!-- 	<arg name="range" default="18.0"/> -->
+	<!-- 	<arg name="grid_num" default="60"/> -->
+	<!-- 	<arg name="hz" default="100.0"/> -->
+	<!-- 	<arg name="crop" default="10"/> -->
+	<!-- 	<arg name="save_data_num" default="2"/> -->
+    <!--  -->
+	<!-- 	<!&#45;&#45; <param name="use_sim_time" value="true"/> &#45;&#45;> -->
+	<!-- 	 -->
+	<!-- 	<node pkg="bev_converter" type="bev_converter" name="bev_converter" output="screen"> -->
+	<!-- 		<param name="RANGE" value="$(arg range)" type="double"/> -->
+	<!-- 		<param name="GRID_NUM" value="$(arg grid_num)" type="int"/> -->
+	<!-- 		<param name="Hz" value="$(arg hz)" type="double"/> -->
+	<!-- 	</node> -->
+    <!--  -->
+	<!-- 	<node pkg="bev_converter" type="bev_flow_estimator" name="bev_flow_estimator" output="screen"> -->
+	<!-- 		<param name="RANGE" value="$(arg range)" type="double"/> -->
+	<!-- 		<param name="GRID_NUM" value="$(arg grid_num)" type="int"/> -->
+	<!-- 		<param name="Hz" value="$(arg hz)" type="double"/> -->
+	<!-- 		<param name="MANUAL_CROP_SIZE" value="$(arg crop)" type="int"/> -->
+	<!-- 		<param name="SAVE_NUMBER" value="$(arg save_data_num)" type="int"/> -->
+	<!-- 		<rosparam command="load" file="$(find cats)/config/cats_motion_param.yaml"/> -->
+	<!-- 	</node> -->
+    <!--  -->
+	<!-- 	<node pkg="rviz" name="rviz" type="rviz" args="&#45;d /home/amsl/.rviz/bev.rviz"/> -->
+	<!-- </group> -->
 </launch>

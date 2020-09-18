@@ -4,11 +4,12 @@ BEVFlowEstimator::BEVFlowEstimator(void)
 : nh("~")
 {
     nh.param("RANGE", RANGE, {18.0});
-    nh.param("GRID_NUM", GRID_NUM, {60});
+    nh.param("GRID_NUM", GRID_NUM, {80});
     nh.param("Hz", Hz, {100.0});
     nh.param("FLOW_IMAGE_SIZE", FLOW_IMAGE_SIZE, {60});
     nh.param("SAVE_NUMBER", SAVE_NUMBER, {1});
     nh.param("MANUAL_CROP_SIZE", MANUAL_CROP_SIZE, {10});
+    nh.param("PKG_PATH", PKG_PATH, {"/home/amsl/ros_catkin_ws/src/bev_converter/bev_img"});
     // nh.param("");
     nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
@@ -45,7 +46,7 @@ void BEVFlowEstimator::executor(void)
             
 			std::vector<int> params(2);
 			// .png
-			const std::string folder_name = "/home/amsl/ros_catkin_ws/src/bev_converter/bev_img/data_" + std::to_string(SAVE_NUMBER);
+			const std::string folder_name = PKG_PATH + "/data_" + std::to_string(SAVE_NUMBER);
 			params[0] = CV_IMWRITE_PNG_COMPRESSION;
 			params[1] = 9;
 
