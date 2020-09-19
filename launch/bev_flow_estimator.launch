@@ -3,6 +3,7 @@
     <arg name="grid_num" default="80"/>
     <arg name="hz" default="100.0"/>
     <arg name="crop" default="10"/>
+    <arg name="is_save_image" default="false"/>
     <arg name="save_data_num" default="2"/>
 	<arg name="pkg_path" default="/home/amsl/ros_catkin_ws/src/bev_converter/bev_img"/>
 
@@ -19,6 +20,7 @@
 		<param name="GRID_NUM" value="$(arg grid_num)" type="int"/>
 		<param name="Hz" value="$(arg hz)" type="double"/>
 		<param name="MANUAL_CROP_SIZE" value="$(arg crop)" type="int"/>
+		<param name="IS_SAVE_IMAGE" value="$(arg is_save_image)" type="bool"/>
 		<param name="SAVE_NUMBER" value="$(arg save_data_num)" type="int"/>
         <!-- <rosparam command="load" file="$(find cats)/config/cats_motion_param.yaml"/> -->
 	</node>

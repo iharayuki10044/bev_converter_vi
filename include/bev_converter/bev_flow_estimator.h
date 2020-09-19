@@ -39,6 +39,7 @@ class BEVFlowEstimator
 
 		bool first_flag = false;
 		bool grid_callback_flag;
+        bool IS_SAVE_IMAGE;
 
 		constexpr static int Col = 0; //i↓  ...   ↑x
 		constexpr static int Row = 1; //j→  ... y←o

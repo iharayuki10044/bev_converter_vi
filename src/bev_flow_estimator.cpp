@@ -10,6 +10,7 @@ BEVFlowEstimator::BEVFlowEstimator(void)
     nh.param("SAVE_NUMBER", SAVE_NUMBER, {1});
     nh.param("MANUAL_CROP_SIZE", MANUAL_CROP_SIZE, {10});
     nh.param("PKG_PATH", PKG_PATH, {"/home/amsl/ros_catkin_ws/src/bev_converter/bev_img"});
+    nh.param("IS_SAVE_IMAGE", IS_SAVE_IMAGE, {false});
     // nh.param("");
     nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
@@ -44,26 +45,27 @@ void BEVFlowEstimator::executor(void)
 			cv::imshow("bev_flow", bev_flow);
 			cv::waitKey(1);
             
-			std::vector<int> params(2);
-			// .png
-			const std::string folder_name = PKG_PATH + "/data_" + std::to_string(SAVE_NUMBER);
-			params[0] = CV_IMWRITE_PNG_COMPRESSION;
-			params[1] = 9;
+            if(IS_SAVE_IMAGE){
+                std::vector<int> params(2);
+                // .png
+                const std::string folder_name = PKG_PATH + "/data_" + std::to_string(SAVE_NUMBER);
+                params[0] = CV_IMWRITE_PNG_COMPRESSION;
+                params[1] = 9;
 
-			struct stat statBuf;
-			if(stat(folder_name.c_str(), &statBuf) == 0){
-				std::cout << "exist dir" << std::endl;
-			}else{
-				std::cout << "mkdir" << std::endl;
-				if(mkdir(folder_name.c_str(), 0755) != 0){
-					std::cout << "mkdir error" << std::endl;
-				}
-			}
-			/* cv::imwrite("/home/amsl/ros_catkin_ws/src/bev_converter/bev_img/data_" + std::to_string(SAVE_NUMBER) + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params); */
-			cv::imwrite(folder_name + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params);
-			std::cout << "SAVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-
-            i++;
+                struct stat statBuf;
+                if(stat(folder_name.c_str(), &statBuf) == 0){
+                    std::cout << "exist dir" << std::endl;
+                }else{
+                    std::cout << "mkdir" << std::endl;
+                    if(mkdir(folder_name.c_str(), 0755) != 0){
+                        std::cout << "mkdir error" << std::endl;
+                    }
+                }
+                /* cv::imwrite("/home/amsl/ros_catkin_ws/src/bev_converter/bev_img/data_" + std::to_string(SAVE_NUMBER) + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params); */
+                cv::imwrite(folder_name + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params);
+                std::cout << "SAVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+                i++;
+            }
 		}
 
 		r.sleep();
