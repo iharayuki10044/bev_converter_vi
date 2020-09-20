@@ -53,7 +53,8 @@ class BEVFlowEstimator
         
 		ros::Subscriber grid_subscriber;
 		ros::Subscriber odom_subscriber;
-		ros::Publisher bev_image_publisher;
+		// image_transport::Publisher flow_image_publisher;
+		ros::Publisher flow_image_publisher;
 		ros::Publisher bev_transformed_image_publisher;
 		
         nav_msgs::OccupancyGrid bev_grid;
@@ -63,6 +64,7 @@ class BEVFlowEstimator
         cv::Mat input_grid_img;
         cv::Mat pre_input_grid_img;
 
+		// image_transport::ImageTransport it;
 };
 
 #endif// __BEV_FLOW_ESTIMATOR_H

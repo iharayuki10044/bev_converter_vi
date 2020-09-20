@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   	tf
 	pcl_ros
     cv_bridge
+	image_transport
     # message_generation
 )
 

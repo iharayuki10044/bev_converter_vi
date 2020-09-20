@@ -15,6 +15,7 @@ BEVFlowEstimator::BEVFlowEstimator(void)
     nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
     grid_subscriber = nh.subscribe("/bev/grid", 10, &BEVFlowEstimator::grid_callback, this);
+	flow_image_publisher = nh.advertise<sensor_msgs::Image>("/bev/flow_image", 10);
     /* grid_subscriber = nh.subscribe("/dynamic_cloud_detector/occupancy_grid", 10, &BEVFlowEstimator::grid_callback, this); */
 }
 
@@ -38,12 +39,12 @@ void BEVFlowEstimator::executor(void)
 
             cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
 			cv::rotate(bev_flow, bev_flow, cv::ROTATE_90_COUNTERCLOCKWISE);
-
 			bev_flow.convertTo(bev_flow, CV_8U, 255);
 
-			cv::namedWindow("bev_flow", CV_WINDOW_AUTOSIZE);
-			cv::imshow("bev_flow", bev_flow);
-			cv::waitKey(1);
+			/* std::cout << "imshow" << std::endl; */
+			/* cv::namedWindow("bev_flow", CV_WINDOW_AUTOSIZE); */
+			/* cv::imshow("bev_flow", bev_flow); */
+			/* cv::waitKey(1); */
             
             if(IS_SAVE_IMAGE){
                 std::vector<int> params(2);
@@ -63,9 +64,15 @@ void BEVFlowEstimator::executor(void)
                 }
                 /* cv::imwrite("/home/amsl/ros_catkin_ws/src/bev_converter/bev_img/data_" + std::to_string(SAVE_NUMBER) + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params); */
                 cv::imwrite(folder_name + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params);
-                std::cout << "SAVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+                /* std::cout << "SAVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl; */
                 i++;
             }
+
+			std::cout << "pub img" << std::endl;
+			cv::Mat flow_img;
+			bev_flow.copyTo(flow_img);
+			sensor_msgs::ImagePtr flow_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", flow_img).toImageMsg();
+			flow_image_publisher.publish(flow_img_msg);
 		}
 
 		r.sleep();
@@ -77,7 +84,7 @@ void BEVFlowEstimator::executor(void)
 
 void BEVFlowEstimator::formatter(void)
 {
-	std::cout << "formatter" << std::endl;
+	/* std::cout << "formatter" << std::endl; */
 
     dt = 1.0 / Hz;
     grid_size = RANGE / GRID_NUM;
@@ -86,7 +93,7 @@ void BEVFlowEstimator::formatter(void)
 
 void BEVFlowEstimator::initializer(void)
 {
-	std::cout << "initializer" << std::endl;
+	/* std::cout << "initializer" << std::endl; */
 
     first_flag = true;
     grid_callback_flag = false;
@@ -95,7 +102,7 @@ void BEVFlowEstimator::initializer(void)
 
 void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 {
-	std::cout << "grid_callback" << std::endl;
+	/* std::cout << "grid_callback" << std::endl; */
 
 	nav_msgs::OccupancyGrid bev_grid = *msg;
     
@@ -126,7 +133,7 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 
 cv::Mat BEVFlowEstimator::flow_estimator(const cv::Mat &pre_img, const cv::Mat &cur_img)
 {
-	std::cout << "flow_estimator" << std::endl;
+	/* std::cout << "flow_estimator" << std::endl; */
 
 	cv::Ptr<cv::superres::DenseOpticalFlowExt> optical_flow = cv::superres::createOptFlow_DualTVL1();
     cv::Mat flow_x, flow_y;

@@ -28,7 +28,7 @@ BEVImageGenerator::BEVImageGenerator(double range, int grid_num, int manual_crop
 
 cv::Mat BEVImageGenerator::cropped_current_grid_img_generator(cv::Mat src_img)
 {
-	std::cout << "BEVImageGenerator::cropped_current_grid_img_generator" << std::endl;
+	/* std::cout << "BEVImageGenerator::cropped_current_grid_img_generator" << std::endl; */
     cv::Mat dst_img = image_cropper(src_img);
 
     return dst_img;
@@ -37,7 +37,7 @@ cv::Mat BEVImageGenerator::cropped_current_grid_img_generator(cv::Mat src_img)
 
 cv::Mat BEVImageGenerator::cropped_transformed_grid_img_generator(cv::Mat src_img)
 {
-	std::cout << "BEVImageGenerator::cropped_transformed_grid_img_generator" << std::endl;
+	/* std::cout << "BEVImageGenerator::cropped_transformed_grid_img_generator" << std::endl; */
 	
     cv::Mat transformed_grid_img, dst_img;
 
@@ -53,7 +53,7 @@ cv::Mat BEVImageGenerator::cropped_transformed_grid_img_generator(cv::Mat src_im
 
 void BEVImageGenerator::odom_callback(const nav_msgs::OdometryConstPtr &msg)
 {
-	std::cout << "BEVImageGenerator::odom_callback" << std::endl;
+	/* std::cout << "BEVImageGenerator::odom_callback" << std::endl; */
 
 	tf::Quaternion quat;
 	geometry_msgs::Quaternion geometry_quat;
@@ -97,7 +97,7 @@ void BEVImageGenerator::odom_callback(const nav_msgs::OdometryConstPtr &msg)
 
 void BEVImageGenerator::formatter(void)
 {
-	std::cout << "BEVImageGenerator::formatter" << std::endl;
+	/* std::cout << "BEVImageGenerator::formatter" << std::endl; */
 
     dt = 1.0 / Hz;
     grid_size = RANGE / GRID_NUM;
@@ -120,12 +120,12 @@ void BEVImageGenerator::formatter(void)
     int crop_size_rotate = (int)(0.5 * RANGE * tan(robot_param.max_yawrate * dt) / grid_size);
     if(0 < crop_size_forward && crop_size_forward < crop_size_rotate){
         crop_size = crop_size_rotate;
-        std::cout << "crop mode : rotate" << std::endl;
-        std::cout << "crop_size : " << crop_size_rotate << std::endl;
+        /* std::cout << "crop mode : rotate" << std::endl; */
+        /* std::cout << "crop_size : " << crop_size_rotate << std::endl; */
     }else if(0 < crop_size_rotate && crop_size_rotate < crop_size_forward){
         crop_size = crop_size_forward;
-        std::cout << "crop mode : forward" << std::endl;
-        std::cout << "crop_size : " << crop_size_forward << std::endl;
+        /* std::cout << "crop mode : forward" << std::endl; */
+        /* std::cout << "crop_size : " << crop_size_forward << std::endl; */
     }else{
 		crop_size = MANUAL_CROP_SIZE;
 	}
@@ -141,7 +141,7 @@ void BEVImageGenerator::formatter(void)
 
 void BEVImageGenerator::initializer(void)
 {
-	std::cout << "BEVImageGenerator::initializer" << std::endl;
+	/* std::cout << "BEVImageGenerator::initializer" << std::endl; */
 
     unit_vector.dst = unit_vector.src;
 }
@@ -150,7 +150,7 @@ void BEVImageGenerator::initializer(void)
 
 Eigen::Vector2i BEVImageGenerator::cell_motion_calculator(std::string dim)
 {
-	std::cout << "BEVImageGenerator::cell_motion_calculator" << std::endl;
+	/* std::cout << "BEVImageGenerator::cell_motion_calculator" << std::endl; */
 
     Eigen::Vector3d src_unit_vector = Eigen::Vector3d::Zero();
     
@@ -185,7 +185,7 @@ Eigen::Vector2i BEVImageGenerator::cell_motion_calculator(std::string dim)
 
 void BEVImageGenerator::unit_vector_registrator(void)
 {
-	std::cout << "BEVImageGenerator::unit_vector_registrator" << std::endl;
+	/* std::cout << "BEVImageGenerator::unit_vector_registrator" << std::endl; */
 
     unit_vector.dst.o += cell_motion_calculator("unit_vector_o");
     unit_vector.dst.x += cell_motion_calculator("unit_vector_x");
@@ -195,7 +195,7 @@ void BEVImageGenerator::unit_vector_registrator(void)
 
 cv::Mat BEVImageGenerator::image_transformer(cv::Mat src_img)
 {
-	std::cout << "BEVImageGenerator::image_transformer" << std::endl;
+	/* std::cout << "BEVImageGenerator::image_transformer" << std::endl; */
 
     unit_vector_registrator();
     const cv::Point2f src_pt[] = {cv::Point2f(-(float)unit_vector.src.o[Col], -(float)unit_vector.src.o[Row]),
@@ -228,7 +228,7 @@ cv::Mat BEVImageGenerator::image_transformer(cv::Mat src_img)
 
 cv::Mat BEVImageGenerator::image_cropper(cv::Mat src_img)
 {
-	std::cout << "BEVImageGenerator::image_cropper" << std::endl;
+	/* std::cout << "BEVImageGenerator::image_cropper" << std::endl; */
 
     cv::Rect roi(cv::Point(crop_size, crop_size), cv::Size(GRID_NUM - 2 * crop_size, GRID_NUM - 2 * crop_size));
     cv::Mat dst_img = src_img(roi);
