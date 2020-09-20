@@ -1,6 +1,0 @@
-devel_space: /home/amsl/ros_catkin_ws/src/bev_converter/devel
-install: false
-install_space: /home/amsl/ros_catkin_ws/src/bev_converter/install
-profile: default
-source_space: /home/amsl/ros_catkin_ws/src/bev_converter/src
-workspace: /home/amsl/ros_catkin_ws/src/bev_converter
