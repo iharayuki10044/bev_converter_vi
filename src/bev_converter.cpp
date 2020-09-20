@@ -4,7 +4,7 @@ BEVConverter::BEVConverter(void)
 : nh("~")
 {
     nh.param("RANGE", RANGE, {18.0});
-    nh.param("GRID_NUM", GRID_NUM, {60});
+    nh.param("GRID_NUM", GRID_NUM, {80});
     nh.param("Hz", Hz, {100.0});
     // nh.param("");
     

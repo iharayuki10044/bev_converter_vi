@@ -40,5 +40,5 @@
         <param name="SKIP_SCAN_FLAG" value="$(arg skip_scan_flag)"/>
     </node>
 	<!-- optional -->
-	<!-- <include file="$(find bev_converter)/launch/bag_player.launch"/> -->
+	<include file="$(find bev_converter)/launch/bag_player.launch"/>
 </launch>
