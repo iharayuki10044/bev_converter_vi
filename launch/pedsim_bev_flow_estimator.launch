@@ -9,7 +9,7 @@
     <arg name="child_frame_id" default="base_footprint"/>
 	<arg name="pkg_path" default="/home/amsl/ros_catkin_ws/src/bev_converter/bev_img"/>
 
-	<param name="use_sim_time" value="false"/>
+	<param name="use_sim_time" value="true"/>
 
 	<node pkg="bev_converter" type="bev_converter" name="bev_converter">
 		<param name="RANGE" value="$(arg range)" type="double"/>

@@ -27,7 +27,7 @@ void BEVFlowEstimator::executor(void)
     bev_image_generator.formatter();
     int i = 0;
 
-	ros::Rate r((int)Hz);
+	ros::Rate r(Hz);
 	while(ros::ok()){
         bev_image_generator.initializer();
 
