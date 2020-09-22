@@ -52,7 +52,7 @@ void BEVConverter::pc_callback(const sensor_msgs::PointCloud2ConstPtr &msg)
 
     input_pc = *msg;
 	pcl::fromROSMsg(input_pc, *pcl_input_pc);
-    pcl_filtered_pc = pc_downsampling(pcl_input_pc);
+    // pcl_filtered_pc = pc_downsampling(pcl_input_pc);
     pc_callback_flag = true;
 }
 

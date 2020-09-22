@@ -10,7 +10,7 @@
 
 	<param name="use_sim_time" value="true"/>
 
-	<node pkg="bev_converter" type="bev_converter" name="bev_converter" output="screen">
+	<node pkg="bev_converter" type="bev_converter" name="bev_converter">
 		<param name="RANGE" value="$(arg range)" type="double"/>
 		<param name="GRID_NUM" value="$(arg grid_num)" type="int"/>
 		<param name="Hz" value="$(arg hz)" type="double"/>

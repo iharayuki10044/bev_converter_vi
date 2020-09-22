@@ -6,7 +6,7 @@ BEVFlowEstimator::BEVFlowEstimator(void)
     nh.param("RANGE", RANGE, {18.0});
     nh.param("GRID_NUM", GRID_NUM, {80});
     nh.param("Hz", Hz, {100.0});
-    nh.param("FLOW_IMAGE_SIZE", FLOW_IMAGE_SIZE, {60});
+    nh.param("FLOW_IMAGE_SIZE", FLOW_IMAGE_SIZE, {80});
     nh.param("SAVE_NUMBER", SAVE_NUMBER, {1});
     nh.param("MANUAL_CROP_SIZE", MANUAL_CROP_SIZE, {10});
     nh.param("PKG_PATH", PKG_PATH, {"/home/amsl/ros_catkin_ws/src/bev_converter/bev_img"});
@@ -35,16 +35,18 @@ void BEVFlowEstimator::executor(void)
             initializer();
             const cv::Mat cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img);
             const cv::Mat cropped_transformed_grid_img = bev_image_generator.cropped_transformed_grid_img_generator(pre_input_grid_img);
-            cv::Mat bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
+			cv::Mat bev_flow;
+			if(cropped_transformed_grid_img.size() == cropped_current_grid_img.size()){
+            	bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
+				// cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
+				cv::rotate(bev_flow, bev_flow, cv::ROTATE_90_COUNTERCLOCKWISE);
+				bev_flow.convertTo(bev_flow, CV_8U, 255);
 
-            cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
-			cv::rotate(bev_flow, bev_flow, cv::ROTATE_90_COUNTERCLOCKWISE);
-			bev_flow.convertTo(bev_flow, CV_8U, 255);
-
-			std::cout << "imshow" << std::endl;
-			cv::namedWindow("bev_flow", CV_WINDOW_AUTOSIZE);
-			cv::imshow("bev_flow", bev_flow);
-			cv::waitKey(1);
+				/* std::cout << "imshow" << std::endl; */
+				/* cv::namedWindow("bev_flow", CV_WINDOW_AUTOSIZE); */
+				/* cv::imshow("bev_flow", bev_flow); */
+				/* cv::waitKey(1); */
+			}
             
             if(IS_SAVE_IMAGE){
                 std::vector<int> params(2);
@@ -133,10 +135,13 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 
 cv::Mat BEVFlowEstimator::flow_estimator(const cv::Mat &pre_img, const cv::Mat &cur_img)
 {
-	/* std::cout << "flow_estimator" << std::endl; */
+	std::cout << "flow_estimator" << std::endl;
 
 	cv::Ptr<cv::superres::DenseOpticalFlowExt> optical_flow = cv::superres::createOptFlow_DualTVL1();
     cv::Mat flow_x, flow_y;
+
+	std::cout << "pre_img.size() = " << pre_img.size() << std::endl;
+	std::cout << "cur_img.size() = " << cur_img.size() << std::endl;
     optical_flow->calc(pre_img, cur_img, flow_x, flow_y);
 
     /*

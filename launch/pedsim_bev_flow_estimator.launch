@@ -18,7 +18,7 @@
 		<param name="CHILD_FRAME_ID" value="$(arg child_frame_id)" type="str"/>
 	</node>
 
-	<node pkg="bev_converter" type="bev_flow_estimator" name="bev_flow_estimator" output="screen">
+	<node pkg="bev_converter" type="bev_flow_estimator" name="bev_flow_estimator">
 		<param name="RANGE" value="$(arg range)" type="double"/>
 		<param name="GRID_NUM" value="$(arg grid_num)" type="int"/>
 		<param name="Hz" value="$(arg hz)" type="double"/>
@@ -28,7 +28,7 @@
         <!-- <rosparam command="load" file="$(find cats)/config/cats_motion_param.yaml"/> -->
 	</node>
 
-	<node pkg="bev_converter" type="pointcloud_converter" name="pointcloud_converter" output="screen">
+	<node pkg="bev_converter" type="pointcloud_converter" name="pointcloud_converter">
 	</node>
 	<node pkg="bev_converter" type="odom_publisher" name="odom_publisher">
 	</node>
