@@ -1,5 +1,7 @@
 #include <ros/ros.h>
-#include <tf/transform_broadcaster.h>
+#include <tf/tf.h>
+#include <tf/transform_listener.h>
+#include <tf/transform_datatypes.h>
 #include <tf2/utils.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <nav_msgs/Odometry.h>
@@ -17,13 +19,16 @@ class OdomPublisher
 		std::string CMD_VEL_TOPIC, ODOM_TOPIC, FRAME_ID, CHILD_FRAME_ID;
 		bool first_flag = false;
 		int step;
-		double th;
+		double Hz;
 
 		ros::NodeHandle nh;
 		ros::Subscriber cmd_vel_sub;
 		ros::Publisher odom_pub;
 		ros::Time current_time, last_time;
 		nav_msgs::Odometry odom;
+
+		tf::TransformListener listener;
+		tf::StampedTransform transform;
 };
 
 
@@ -34,6 +39,7 @@ OdomPublisher::OdomPublisher(void)
 	nh.param("ODOM_TOPIC", ODOM_TOPIC, {"/odom"});
 	nh.param("FRAME_ID", FRAME_ID, {"odom"});
 	nh.param("CHILD_FRAME_ID", CHILD_FRAME_ID, {"base_footprint"});
+	nh.param("Hz", Hz, {100.0});
 	
 	cmd_vel_sub = nh.subscribe(CMD_VEL_TOPIC, 10, &OdomPublisher::cmd_vel_callback, this);
 	odom_pub = nh.advertise<nav_msgs::Odometry>(ODOM_TOPIC, 10);
@@ -42,49 +48,37 @@ OdomPublisher::OdomPublisher(void)
 
 void OdomPublisher::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr &msg)
 {
+	geometry_msgs::Twist cmd_vel = *msg;
+
 	if(!first_flag){
 		initializer();
 		first_flag = true;
 	}
 
-	geometry_msgs::Twist cmd_vel = *msg;
+	try{
+		listener.lookupTransform(FRAME_ID, CHILD_FRAME_ID, ros::Time(0), transform);
+		current_time = ros::Time::now();
+		
+		odom.pose.pose.position.x = transform.getOrigin().x();
+		odom.pose.pose.position.y = transform.getOrigin().y();
+		odom.pose.pose.position.z = transform.getOrigin().z();
+		odom.pose.pose.orientation = tf::createQuaternionMsgFromYaw(tf::getYaw(transform.getRotation()));
 
-	current_time = ros::Time::now();
-
-	double dt = (current_time - last_time).toSec();
-	double dth = cmd_vel.angular.z * dt;
+	}   
+	catch (tf::TransformException ex){
+		ROS_ERROR("%s",ex.what());
+		ros::Duration(1.0).sleep();
+	} 
 
 	odom.header.seq = step;
-	odom.header.stamp = current_time;
+	odom.header.stamp = ros::Time::now();
 	odom.header.frame_id = FRAME_ID;
 	odom.child_frame_id = CHILD_FRAME_ID;
 	odom.twist.twist = cmd_vel;
-
-	odom.pose.pose.position.x += cmd_vel.linear.x * cos(th) * dt;
-	odom.pose.pose.position.y += cmd_vel.linear.x * sin(th) * dt;
-	th += dth;
-	
-	geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th);
-	geometry_msgs::TransformStamped odom_trans;
-	odom_trans.header.stamp = current_time;
-	odom_trans.header.frame_id = FRAME_ID;
-	odom_trans.child_frame_id = CHILD_FRAME_ID;
-	odom_trans.transform.translation.x = odom.pose.pose.position.x;
-	odom_trans.transform.translation.y = odom.pose.pose.position.y;
-	odom_trans.transform.translation.z = odom.pose.pose.position.z;
-	odom_trans.transform.rotation = odom_quat;
-	
-	//send the transform
-	tf::TransformBroadcaster odom_broadcaster;
-	odom_broadcaster.sendTransform(odom_trans);
-	
-	odom.pose.pose.orientation = odom_quat;
 	
 	odom_pub.publish(odom);
 
 	step++;
-
-	last_time = current_time;
 }
 
 
@@ -100,7 +94,6 @@ void OdomPublisher::initializer(void)
 	odom.pose.pose.orientation.y = 0.0;
 	odom.pose.pose.orientation.z = 0.0;
 	odom.pose.pose.orientation.w = 0.0;
-	th = tf2::getYaw(odom.pose.pose.orientation);
 }
 
 
