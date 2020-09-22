@@ -83,6 +83,8 @@ void OdomPublisher::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr &msg)
 	odom_pub.publish(odom);
 
 	step++;
+
+	last_time = current_time;
 }
 
 
