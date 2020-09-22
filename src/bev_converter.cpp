@@ -18,23 +18,23 @@ BEVConverter::BEVConverter(void)
 
 void BEVConverter::execution(void)
 {
-	/* std::cout << "formatter" << std::endl; */
+	std::cout << "formatter" << std::endl;
     formatter();
 
 	ros::Rate r((int)Hz);
 	while(ros::ok()){
-		/* std::cout << "initializer" << std::endl; */
+		std::cout << "initializer" << std::endl;
         initializer();
 
 		if(pc_callback_flag && odom_callback_flag){
-			/* std::cout << "converter" << std::endl; */
+			std::cout << "converter" << std::endl;
             converter();
 
     		bev_grid.header.stamp = ros::Time::now();
     		bev_grid.info.map_load_time = ros::Time::now();
     		bev_grid_publisher.publish(bev_grid);
             
-			//std::cout << bev_grid << std::endl;
+			std::cout << bev_grid << std::endl;
 		}
 		tf_listen_flag = false;
 		pc_callback_flag = false;
