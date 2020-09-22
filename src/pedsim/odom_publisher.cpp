@@ -1,5 +1,7 @@
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
+#include <tf2/utils.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Twist.h>
 
@@ -15,10 +17,12 @@ class OdomPublisher
 		std::string CMD_VEL_TOPIC, ODOM_TOPIC, FRAME_ID, CHILD_FRAME_ID;
 		bool first_flag = false;
 		int step;
+		double th;
 
 		ros::NodeHandle nh;
 		ros::Subscriber cmd_vel_sub;
 		ros::Publisher odom_pub;
+		ros::Time current_time, last_time;
 		nav_msgs::Odometry odom;
 };
 
@@ -38,8 +42,6 @@ OdomPublisher::OdomPublisher(void)
 
 void OdomPublisher::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr &msg)
 {
-	ros::Time current_time = ros::Time::now();
-
 	if(!first_flag){
 		initializer();
 		first_flag = true;
@@ -47,16 +49,22 @@ void OdomPublisher::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr &msg)
 
 	geometry_msgs::Twist cmd_vel = *msg;
 
+	current_time = ros::Time::now();
+
+	double dt = (current_time - last_time).toSec();
+	double dth = cmd_vel.angular.z * dt;
+
 	odom.header.seq = step;
 	odom.header.stamp = current_time;
 	odom.header.frame_id = FRAME_ID;
 	odom.child_frame_id = CHILD_FRAME_ID;
 	odom.twist.twist = cmd_vel;
+
+	odom.pose.pose.position.x += cmd_vel.linear.x * cos(th) * dt;
+	odom.pose.pose.position.y += cmd_vel.linear.x * sin(th) * dt;
+	th += dth;
 	
-	odom.pose.pose.position.x += odom.twist.twist.linear.x * cos(odom.twist.twist.angular.z);
-	odom.pose.pose.position.y += odom.twist.twist.linear.x * sin(odom.twist.twist.angular.z);
-	
-	geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(odom.twist.twist.angular.z);
+	geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(th);
 	geometry_msgs::TransformStamped odom_trans;
 	odom_trans.header.stamp = current_time;
 	odom_trans.header.frame_id = FRAME_ID;
@@ -80,6 +88,8 @@ void OdomPublisher::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr &msg)
 
 void OdomPublisher::initializer(void)
 {
+	current_time = ros::Time::now();
+	last_time = ros::Time::now();
 	step = 0;
 	odom.pose.pose.position.x = 0.0;
 	odom.pose.pose.position.y = 0.0;
@@ -88,6 +98,7 @@ void OdomPublisher::initializer(void)
 	odom.pose.pose.orientation.y = 0.0;
 	odom.pose.pose.orientation.z = 0.0;
 	odom.pose.pose.orientation.w = 0.0;
+	th = tf2::getYaw(odom.pose.pose.orientation);
 }
 
 
