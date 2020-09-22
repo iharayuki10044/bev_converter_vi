@@ -51,6 +51,7 @@ class BEVConverter
         double RANGE;
         int GRID_NUM;
         float grid_size;
+		std::string CHILD_FRAME_ID;
 
         ros::NodeHandle n;
         ros::NodeHandle nh;

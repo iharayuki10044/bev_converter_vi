@@ -6,6 +6,7 @@
     <arg name="crop" default="10"/>
     <arg name="is_save_image" default="false"/>
     <arg name="save_data_num" default="1"/>
+    <arg name="child_frame_id" default="base_footprint"/>
 	<arg name="pkg_path" default="/home/amsl/ros_catkin_ws/src/bev_converter/bev_img"/>
 
 	<param name="use_sim_time" value="false"/>
@@ -23,13 +24,13 @@
 		<param name="MANUAL_CROP_SIZE" value="$(arg crop)" type="int"/>
 		<param name="IS_SAVE_IMAGE" value="$(arg is_save_image)" type="bool"/>
 		<param name="SAVE_NUMBER" value="$(arg save_data_num)" type="int"/>
+		<param name="CHILD_FRAME_ID" value="$(arg child_frame_id)" type="str"/>
         <!-- <rosparam command="load" file="$(find cats)/config/cats_motion_param.yaml"/> -->
 	</node>
 
 	<node pkg="bev_converter" type="pointcloud_converter" name="pointcloud_converter" output="screen">
 	</node>
 	<node pkg="bev_converter" type="odom_publisher" name="odom_publisher">
-		<!-- <remap from="/odom" to="bev_odom"/> -->
 	</node>
 
     <arg name="width" default="40.0"/>

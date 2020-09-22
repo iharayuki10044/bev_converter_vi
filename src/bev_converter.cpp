@@ -6,6 +6,7 @@ BEVConverter::BEVConverter(void)
     nh.param("RANGE", RANGE, {18.0});
     nh.param("GRID_NUM", GRID_NUM, {80});
     nh.param("Hz", Hz, {100.0});
+    nh.param("CHILD_FRAME_ID", CHILD_FRAME_ID, {"base_link"});
     // nh.param("");
     
     /* pc_subscriber = nh.subscribe("/velodyne_obstacles", 10, &BEVConverter::pc_callback, this); */
@@ -94,7 +95,7 @@ void BEVConverter::odom_callback(const nav_msgs::OdometryConstPtr &msg)
 void BEVConverter::formatter(void)
 {
     bev_grid.header.seq = 0;
-    bev_grid.header.frame_id = "velodyne";
+    bev_grid.header.frame_id = CHILD_FRAME_ID;
     bev_grid.info.resolution = (float)(RANGE / GRID_NUM);
     bev_grid.info.width = GRID_NUM;
     bev_grid.info.height = GRID_NUM;
