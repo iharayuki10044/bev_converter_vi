@@ -8,7 +8,7 @@ class OdomPublisher
 	public:
 		OdomPublisher(void);
 
-		void cmd_vel_callback(geometry_msgs::TwistConstPtr&);
+		void cmd_vel_callback(const geometry_msgs::Twist::ConstPtr&);
 		void initializer(void);
 
 	private:
@@ -16,6 +16,7 @@ class OdomPublisher
 		bool first_flag = false;
 		int step;
 
+		ros::NodeHandle nh;
 		ros::Subscriber cmd_vel_sub;
 		ros::Publisher odom_pub;
 		nav_msgs::Odometry odom;
@@ -35,7 +36,7 @@ OdomPublisher::OdomPublisher(void)
 }
 
 
-void OdomPublisher::cmd_vel_callback(geometry_msgs::TwistConstPtr &msg)
+void OdomPublisher::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr &msg)
 {
 	ros::Time current_time = ros::Time::now();
 
@@ -50,12 +51,12 @@ void OdomPublisher::cmd_vel_callback(geometry_msgs::TwistConstPtr &msg)
 	odom.header.stamp = current_time;
 	odom.header.frame_id = FRAME_ID;
 	odom.child_frame_id = CHILD_FRAME_ID;
-	odom.twist = cmd_vel;
+	odom.twist.twist = cmd_vel;
 	
-	odom.pose.pose.position.x += odom.twist.linear.x * cos(odom.twist.angular.z);
-	odom.pose.pose.position.y += odom.twist.linear.x * sin(odom.twist.angular.z);
+	odom.pose.pose.position.x += odom.twist.twist.linear.x * cos(odom.twist.twist.angular.z);
+	odom.pose.pose.position.y += odom.twist.twist.linear.x * sin(odom.twist.twist.angular.z);
 	
-	geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(odom.twist.angular.z);
+	geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(odom.twist.twist.angular.z);
 	geometry_msgs::TransformStamped odom_trans;
 	odom_trans.header.stamp = current_time;
 	odom_trans.header.frame_id = FRAME_ID;
