@@ -15,6 +15,7 @@
 		<param name="RANGE" value="$(arg range)" type="double"/>
 		<param name="GRID_NUM" value="$(arg grid_num)" type="int"/>
 		<param name="Hz" value="$(arg hz)" type="double"/>
+		<param name="CHILD_FRAME_ID" value="$(arg child_frame_id)" type="str"/>
 	</node>
 
 	<node pkg="bev_converter" type="bev_flow_estimator" name="bev_flow_estimator" output="screen">
@@ -24,7 +25,6 @@
 		<param name="MANUAL_CROP_SIZE" value="$(arg crop)" type="int"/>
 		<param name="IS_SAVE_IMAGE" value="$(arg is_save_image)" type="bool"/>
 		<param name="SAVE_NUMBER" value="$(arg save_data_num)" type="int"/>
-		<param name="CHILD_FRAME_ID" value="$(arg child_frame_id)" type="str"/>
         <!-- <rosparam command="load" file="$(find cats)/config/cats_motion_param.yaml"/> -->
 	</node>
 
