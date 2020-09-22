@@ -29,7 +29,7 @@ OdomPublisher::OdomPublisher(void)
 	nh.param("CMD_VEL_TOPIC", CMD_VEL_TOPIC, {"/pedbot/control/cmd_vel"});
 	nh.param("ODOM_TOPIC", ODOM_TOPIC, {"/odom"});
 	nh.param("FRAME_ID", FRAME_ID, {"odom"});
-	nh.param("CHILD_FRAME_ID", CHILD_FRAME_ID, {"base_link"});
+	nh.param("CHILD_FRAME_ID", CHILD_FRAME_ID, {"base_footprint"});
 	
 	cmd_vel_sub = nh.subscribe(CMD_VEL_TOPIC, 10, &OdomPublisher::cmd_vel_callback, this);
 	odom_pub = nh.advertise<nav_msgs::Odometry>(ODOM_TOPIC, 10);

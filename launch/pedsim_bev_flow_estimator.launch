@@ -29,7 +29,7 @@
 	<node pkg="bev_converter" type="pointcloud_converter" name="pointcloud_converter" output="screen">
 	</node>
 	<node pkg="bev_converter" type="odom_publisher" name="odom_publisher">
-		<remap from="/odom" to="bev_odom"/>
+		<!-- <remap from="/odom" to="bev_odom"/> -->
 	</node>
 
     <arg name="width" default="40.0"/>
@@ -45,7 +45,8 @@
         <param name="BEAM_NUM" value="$(arg beam_num)"/>
         <param name="SKIP_SCAN_FLAG" value="$(arg skip_scan_flag)"/>
         <remap from="/velodyne_obstacles" to="/pedsim_people_sensor/point_cloud2_local"/>
-        <remap from="/odom/complement" to="/bev_odom"/>
+        <remap from="/odom/complement" to="/odom"/>
+        <!-- <remap from="/odom/complement" to="/bev_odom"/> -->
     </node>
 	<!-- optional -->
 	<!-- <include file="$(find bev_converter)/launch/bag_player.launch"/> -->
