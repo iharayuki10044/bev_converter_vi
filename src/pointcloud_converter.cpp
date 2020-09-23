@@ -38,6 +38,9 @@ PointCloudConverter::PointCloudConverter(void)
 void PointCloudConverter::pc_callback(const sensor_msgs::PointCloudConstPtr &pointcloud)
 {
 	if(sensor_msgs::convertPointCloudToPointCloud2(*pointcloud, pointcloud2)){
+		pointcloud2.header = pointcloud->header;
+		pointcloud2.height = pointcloud->points.size();
+		pointcloud2.width = 1;
 		pc2_publisher.publish(pointcloud2);
 	}else{
 		ROS_ERROR("[pointcloud_converter] ERROR");
