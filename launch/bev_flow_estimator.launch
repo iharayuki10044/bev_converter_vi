@@ -5,7 +5,13 @@
     <arg name="flow_image_size" default="50"/>
     <arg name="hz" default="100.0"/>
     <arg name="crop" default="5"/>
+    <arg name="max_corners" default="20"/>
+    <arg name="quality_level" default="0.000001"/>
+    <arg name="min_distance" default="5.0"/>
+    <arg name="win_size" default="20"/>
+    <arg name="max_count" default="30"/>
     <arg name="is_save_image" default="false"/>
+    <arg name="is_dense" default="false"/>
     <arg name="save_data_num" default="1"/>
 	<arg name="pkg_path" default="/home/amsl/ros_catkin_ws/src/bev_converter/bev_img"/>
 
@@ -23,7 +29,13 @@
 		<param name="FLOW_IMAGE_SIZE" value="$(arg flow_image_size)" type="int"/>
 		<param name="Hz" value="$(arg hz)" type="double"/>
 		<param name="MANUAL_CROP_SIZE" value="$(arg crop)" type="int"/>
+		<param name="MAX_CORNERS" value="$(arg max_corners)" type="int"/>
+		<param name="QUALITY_LEVEL" value="$(arg quality_level)" type="double"/>
+		<param name="MIN_DISTANCE" value="$(arg min_distance)" type="double"/>
+		<param name="WIN_SIZE" value="$(arg win_size)" type="int"/>
+		<param name="MAX_COUNT" value="$(arg max_count)" type="int"/>
 		<param name="IS_SAVE_IMAGE" value="$(arg is_save_image)" type="bool"/>
+		<param name="IS_DENSE" value="$(arg is_dense)" type="bool"/>
 		<param name="SAVE_NUMBER" value="$(arg save_data_num)" type="int"/>
         <!-- <rosparam command="load" file="$(find cats)/config/cats_motion_param.yaml"/> -->
 	</node>

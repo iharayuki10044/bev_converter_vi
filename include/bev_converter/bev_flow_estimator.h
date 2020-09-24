@@ -13,6 +13,7 @@
 /* #include <opencv_lib.hpp> */
 #include <opencv2/superres/optical_flow.hpp>
 #include <opencv2/core/base.hpp>
+#include <opencv2/core/types.hpp>
 
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
@@ -32,7 +33,7 @@ class BEVFlowEstimator
         void formatter(void);
         void initializer(void);
 		void grid_callback(const nav_msgs::OccupancyGridConstPtr&);
-        cv::Mat flow_estimator(const cv::Mat&, const cv::Mat&);
+        cv::Mat flow_estimator(cv::Mat&, cv::Mat&);
 
 	private:
         XmlRpc::XmlRpcValue ROBOT_PARAM;
@@ -40,13 +41,14 @@ class BEVFlowEstimator
 		bool first_flag = false;
 		bool grid_callback_flag;
         bool IS_SAVE_IMAGE;
+        bool IS_DENSE;
 
 		constexpr static int Col = 0; //i↓  ...   ↑x
 		constexpr static int Row = 1; //j→  ... y←o
 		
 		std::string PKG_PATH;
-        int GRID_NUM, SAVE_NUMBER, FLOW_IMAGE_SIZE, FLOW_WINiDOW_SIZE, crop_size, MANUAL_CROP_SIZE;
-        double RANGE, Hz, grid_size, dt;
+        int GRID_NUM, SAVE_NUMBER, FLOW_IMAGE_SIZE, FLOW_WINiDOW_SIZE, MANUAL_CROP_SIZE, MAX_CORNERS, WIN_SIZE, MAX_COUNT;
+        double RANGE, Hz, grid_size, dt, QUALITY_LEVEL, MIN_DISTANCE;
 
         ros::NodeHandle n;
         ros::NodeHandle nh;

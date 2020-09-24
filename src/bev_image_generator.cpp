@@ -171,7 +171,7 @@ Eigen::Vector2i BEVImageGenerator::cell_motion_calculator(std::string dim)
     Eigen::Matrix3d homogenous_tf = Eigen::Matrix3d::Zero();
     homogenous_tf << cos(d_my_odom.yaw), -sin(d_my_odom.yaw), d_my_odom.x / grid_size,
 				  	 sin(d_my_odom.yaw),  cos(d_my_odom.yaw), d_my_odom.y / grid_size,
-					 0.0,                 0.0,                0.0;
+					 0.0,                 0.0,                1.0;
 
     Eigen::Vector3d cell_movement_;
     cell_movement_ = homogenous_tf.colPivHouseholderQr().solve(src_unit_vector);    
@@ -212,15 +212,10 @@ cv::Mat BEVImageGenerator::image_transformer(cv::Mat src_img)
     /*                     		  cv::Point2f((float)unit_vector.dst.y[Col], (float)unit_vector.dst.y[Row])}; */
     const cv::Mat affine_matrix = cv::getAffineTransform(src_pt, dst_pt);
     cv::Mat dst_img;
-    cv::warpAffine(src_img, dst_img, affine_matrix, src_img.size(), CV_INTER_LINEAR, cv::BORDER_TRANSPARENT);
-    
-    cv::line(src_img, src_pt[0], src_pt[1], cv::Scalar(255,255,0), 2);
-    cv::line(src_img, src_pt[1], src_pt[2], cv::Scalar(255,255,0), 2);
-    cv::line(src_img, src_pt[2], src_pt[0], cv::Scalar(255,255,0), 2);
-    cv::line(src_img, dst_pt[0], dst_pt[1], cv::Scalar(255,0,255), 2);
-    cv::line(src_img, dst_pt[1], dst_pt[2], cv::Scalar(255,0,255), 2);
-    cv::line(src_img, dst_pt[2], dst_pt[0], cv::Scalar(255,0,255), 2);
+    cv::warpAffine(src_img, dst_img, affine_matrix, src_img.size(), cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
 
+	// std::cout << src_img << std::endl;
+	// std::cout << dst_img << std::endl;
 
     return dst_img;
 }
