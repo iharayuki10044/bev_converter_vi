@@ -3,8 +3,8 @@
 BEVConverter::BEVConverter(void)
 : nh("~")
 {
-    nh.param("RANGE", RANGE, {18.0});
-    nh.param("GRID_NUM", GRID_NUM, {80});
+    nh.param("RANGE", RANGE, {10.0});
+    nh.param("GRID_NUM", GRID_NUM, {50});
     nh.param("Hz", Hz, {100.0});
     nh.param("CHILD_FRAME_ID", CHILD_FRAME_ID, {"base_link"});
     // nh.param("");

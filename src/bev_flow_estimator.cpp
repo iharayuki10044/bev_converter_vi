@@ -3,12 +3,12 @@
 BEVFlowEstimator::BEVFlowEstimator(void)
 : nh("~")
 {
-    nh.param("RANGE", RANGE, {18.0});
-    nh.param("GRID_NUM", GRID_NUM, {80});
+    nh.param("RANGE", RANGE, {10.0});
+    nh.param("GRID_NUM", GRID_NUM, {50});
     nh.param("Hz", Hz, {100.0});
-    nh.param("FLOW_IMAGE_SIZE", FLOW_IMAGE_SIZE, {80});
+    nh.param("FLOW_IMAGE_SIZE", FLOW_IMAGE_SIZE, {50});
     nh.param("SAVE_NUMBER", SAVE_NUMBER, {1});
-    nh.param("MANUAL_CROP_SIZE", MANUAL_CROP_SIZE, {10});
+    nh.param("MANUAL_CROP_SIZE", MANUAL_CROP_SIZE, {5});
     nh.param("PKG_PATH", PKG_PATH, {"/home/amsl/ros_catkin_ws/src/bev_converter/bev_img"});
     nh.param("IS_SAVE_IMAGE", IS_SAVE_IMAGE, {false});
     // nh.param("");
@@ -158,8 +158,8 @@ cv::Mat BEVFlowEstimator::flow_estimator(const cv::Mat &pre_img, const cv::Mat &
     cv::Mat hsv_planes[3];
     hsv_planes[0] = angle;
     // cv::normalize(magnitude, magnitude, 0, 1, NORM_MINMAX);
-    cv::normalize(magnitude, magnitude, 0, 1, 32); // NORM_MINMAX    = 32 //!< flag
-    // cv::normalize(magnitude, magnitude, 0, 1, NORM_L1);
+    /* cv::normalize(magnitude, magnitude, 0, 1, 32); // NORM_MINMAX    = 32 //!< flag */
+    cv::normalize(magnitude, magnitude, 1.0, 0.0, cv::NORM_L1);
     hsv_planes[1] = magnitude;
     hsv_planes[2] = cv::Mat::ones(magnitude.size(), CV_32F);
     
