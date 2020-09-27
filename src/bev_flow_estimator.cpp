@@ -68,10 +68,10 @@ void BEVFlowEstimator::executor(void)
 					cv::flip(bev_flow, bev_flow, 0);
 					bev_flow.convertTo(bev_flow, CV_8U, 255);
 
-					/* std::cout << "imshow" << std::endl; */
-					/* cv::namedWindow("bev_flow", CV_WINDOW_AUTOSIZE); */
-					/* cv::imshow("bev_flow", bev_flow); */
-					/* cv::waitKey(1); */
+					std::cout << "imshow" << std::endl;
+					cv::namedWindow("bev_flow", CV_WINDOW_AUTOSIZE);
+					cv::imshow("bev_flow", bev_flow);
+					cv::waitKey(1);
 				}
 				
 				if(IS_SAVE_IMAGE){
