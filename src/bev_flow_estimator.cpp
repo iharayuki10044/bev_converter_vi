@@ -104,6 +104,7 @@ void BEVFlowEstimator::executor(void)
 			}
 
 			step++;
+			std::cout << "step : " << step << std::endl;
 			// pre_input_grid_img = input_grid_img;
 		}
 
