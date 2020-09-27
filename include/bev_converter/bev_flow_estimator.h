@@ -42,7 +42,7 @@ class BEVFlowEstimator
 
 		bool first_flag;
 		bool odom_callback_flag = false;
-		bool grid_callback_flag;
+		bool grid_callback_flag = false;
         bool IS_SAVE_IMAGE;
         bool IS_DENSE;
 

@@ -42,7 +42,7 @@ void BEVFlowEstimator::executor(void)
 	while(ros::ok()){
         bev_image_generator.initializer();
 
-		if(grid_callback_flag){
+		if(odom_callback_flag && grid_callback_flag){
             initializer();
 			cv::Mat cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img); // evry time newest
 
@@ -64,7 +64,8 @@ void BEVFlowEstimator::executor(void)
 					bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
 
 					// cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
-					cv::rotate(bev_flow, bev_flow, cv::ROTATE_90_COUNTERCLOCKWISE);
+					// cv::rotate(bev_flow, bev_flow, cv::ROTATE_90_COUNTERCLOCKWISE);
+					cv::flip(bev_flow, bev_flow, 0);
 					bev_flow.convertTo(bev_flow, CV_8U, 255);
 
 					/* std::cout << "imshow" << std::endl; */
@@ -119,7 +120,6 @@ void BEVFlowEstimator::formatter(void)
 
     dt = 1.0 / Hz;
     grid_size = RANGE / GRID_NUM;
-	first_flag = false;
 	step = 0;
 }
 
@@ -128,7 +128,6 @@ void BEVFlowEstimator::initializer(void)
 {
 	/* std::cout << "initializer" << std::endl; */
 
-    grid_callback_flag = false;
 }
 
 void BEVFlowEstimator::odom_callback(const nav_msgs::OdometryConstPtr &msg)
@@ -139,7 +138,7 @@ void BEVFlowEstimator::odom_callback(const nav_msgs::OdometryConstPtr &msg)
 	current_position << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z;
     current_yaw = tf::getYaw(odom.pose.pose.orientation);
 
-	if(step % 10 == 0){
+	if(step % STEP_BORDER == 0){
 		pre_position = current_position;
 		pre_yaw = current_yaw;
 	}
@@ -168,12 +167,11 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
         }
     }
 
-    if(step % 10 == 0){
+    if(step % STEP_BORDER == 0){
         pre_input_grid_img = input_grid_img;
-    	first_flag = true;
     }
 
-    grid_callback_flag = true;
+	grid_callback_flag = true;
 }
 
 
