@@ -11,6 +11,10 @@
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
 
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/common/transforms.h>
+
 #include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
@@ -23,7 +27,7 @@
 class BEVImageGenerator
 {
 	public:
-		BEVImageGenerator(double, int, int, XmlRpc::XmlRpcValue);
+		BEVImageGenerator(double, int, int, XmlRpc::XmlRpcValue, std::string, std::string);
 
         typedef struct dynamics{
             double max_acceleration;
@@ -73,6 +77,7 @@ class BEVImageGenerator
         static std::map<std::string, int> UnitVector;
 
         int GRID_NUM, MANUAL_CROP_SIZE;
+		std::string FRAME_ID, CHILD_FRAME_ID;
         static int crop_size;
         double RANGE;
         static double Hz, dt, grid_size;
@@ -86,6 +91,11 @@ class BEVImageGenerator
 		ros::Publisher bev_transformed_image_publisher;
 		
         // Eigen::Vector3f zero_vector = Eigen::Vector3f::Zero();
+    	Eigen::Affine3d affine_transform;
+
+		pcl::PointXYZ pt0, pt1, pt2;
+		pcl::PointCloud<pcl::PointXYZ> src_euqlid_3pts;
+		pcl::PointCloud<pcl::PointXYZ> dst_euqlid_3pts;
 
 		MyOdom d_my_odom;
         static MyOdom pre_my_odom;

@@ -67,8 +67,7 @@ void OdomPublisher::exe(void)
 			odom.pose.pose.position.z = transform.getOrigin().z();
 			odom.pose.pose.orientation = tf::createQuaternionMsgFromYaw(tf::getYaw(transform.getRotation()));
 
-		}   
-		catch (tf::TransformException ex){
+		}catch (tf::TransformException ex){
 			ROS_ERROR("%s",ex.what());
 			ros::Duration(1.0).sleep();
 		} 

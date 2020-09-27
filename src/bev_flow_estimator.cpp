@@ -17,6 +17,8 @@ BEVFlowEstimator::BEVFlowEstimator(void)
     nh.param("MIN_DISTANCE", MIN_DISTANCE, {5.0});
     nh.param("WIN_SIZE", WIN_SIZE, {3});
     nh.param("MAX_COUNT", MAX_COUNT, {30});
+	nh.param("FRAME_ID", FRAME_ID, {"odom"});
+	nh.param("CHILD_FRAME_ID", CHILD_FRAME_ID, {"base_footprint"});
     // nh.param("");
     nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
@@ -29,7 +31,7 @@ BEVFlowEstimator::BEVFlowEstimator(void)
 void BEVFlowEstimator::executor(void)
 {
     formatter();
-    BEVImageGenerator bev_image_generator(RANGE, GRID_NUM, MANUAL_CROP_SIZE, ROBOT_PARAM);
+    BEVImageGenerator bev_image_generator(RANGE, GRID_NUM, MANUAL_CROP_SIZE, ROBOT_PARAM, FRAME_ID, CHILD_FRAME_ID);
     bev_image_generator.formatter();
     int i = 0;
 
@@ -93,6 +95,8 @@ void BEVFlowEstimator::executor(void)
 			bev_flow.copyTo(flow_img);
 			sensor_msgs::ImagePtr flow_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", flow_img).toImageMsg();
 			flow_image_publisher.publish(flow_img_msg);
+        	
+			pre_input_grid_img = input_grid_img;
 		}
 
 		r.sleep();
@@ -108,6 +112,7 @@ void BEVFlowEstimator::formatter(void)
 
     dt = 1.0 / Hz;
     grid_size = RANGE / GRID_NUM;
+	first_flag = false;
 }
 
 
@@ -125,10 +130,6 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 
 	nav_msgs::OccupancyGrid bev_grid = *msg;
     
-    if(!first_flag){
-        pre_input_grid_img = input_grid_img;
-    	first_flag = true;
-    }
     
     input_grid_img = cv::Mat::zeros(cv::Size(bev_grid.info.width,bev_grid.info.height), CV_8UC1);
 
@@ -143,7 +144,11 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
         }
     }
 
-	pre_input_grid_img = input_grid_img;
+    if(!first_flag){
+        pre_input_grid_img = input_grid_img;
+    	first_flag = true;
+    }
+	std::cout << "first_flag : " << first_flag << std::endl;
 
     grid_callback_flag = true;
 }

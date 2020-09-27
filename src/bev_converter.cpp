@@ -124,6 +124,7 @@ void BEVConverter::converter(void)
         int ix = floor((pt.x + 0.5 * RANGE) / grid_size);
         int iy = floor((pt.y + 0.5 * RANGE) / grid_size);
         int index = ix + iy * (RANGE / grid_size);
+        /* int index = iy + ix * (RANGE / grid_size); */
         if((0 <= ix && ix < GRID_NUM) && (0 <= iy && iy < GRID_NUM)){
 			/* std::cout << "[ix, iy] = [" << ix << ", " << iy << "]" << std::endl; */
             bev_grid.data[index] = (int)Occupied;
