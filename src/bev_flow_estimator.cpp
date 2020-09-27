@@ -53,13 +53,13 @@ void BEVFlowEstimator::executor(void)
 					cropped_transformed_grid_img.convertTo(cropped_transformed_grid_img, CV_8U, 255);
 					cropped_current_grid_img.convertTo(cropped_current_grid_img, CV_8U, 255);
 					
-					/* std::cout << "imshow" << std::endl; */
-					/* cv::namedWindow("cropped_transformed_grid_img", CV_WINDOW_AUTOSIZE); */
-					/* cv::imshow("cropped_transformed_grid_img", cropped_transformed_grid_img); */
-					/* cv::waitKey(1); */
-					/* cv::namedWindow("cropped_current_grid_img", CV_WINDOW_AUTOSIZE); */
-					/* cv::imshow("cropped_current_grid_img", cropped_current_grid_img); */
-					/* cv::waitKey(1); */
+					std::cout << "imshow" << std::endl;
+					cv::namedWindow("cropped_transformed_grid_img", CV_WINDOW_AUTOSIZE);
+					cv::imshow("cropped_transformed_grid_img", cropped_transformed_grid_img);
+					cv::waitKey(1);
+					cv::namedWindow("cropped_current_grid_img", CV_WINDOW_AUTOSIZE);
+					cv::imshow("cropped_current_grid_img", cropped_current_grid_img);
+					cv::waitKey(1);
 
 					bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
 
