@@ -29,58 +29,26 @@ class BEVImageGenerator
 	public:
 		BEVImageGenerator(double, int, int, XmlRpc::XmlRpcValue, std::string, std::string);
 
-        typedef struct dynamics{
-            double max_acceleration;
-            double max_yawrate;
-            double max_d_yawrate;
-            double max_wheel_angular_velocyty;
-            double wheel_radius;
-            double tread;
-        }Dynamics;
-		typedef struct my_odom{
-			double x;
-			double y;
-			double z;
-			double roll;
-			double pitch;
-			double yaw;
-		}MyOdom;
-        typedef struct oxy{
-			Eigen::Vector2i o;
-			Eigen::Vector2i x;
-			Eigen::Vector2i y;
-        }OXY;
-		typedef struct unit_vector_oxy{
-            OXY src;
-            OXY dst;
-		}UnitVectorOXY;
-
 		cv::Mat cropped_current_grid_img_generator(cv::Mat);
-		cv::Mat cropped_transformed_grid_img_generator(cv::Mat);
+		cv::Mat cropped_transformed_grid_img_generator(cv::Mat, Eigen::Vector3d, double, Eigen::Vector3d, double);
 		void odom_callback(const nav_msgs::OdometryConstPtr&);
+        void exector(void);
         void formatter(void);
         void initializer(void);
-        Eigen::Vector2i cell_motion_calculator(std::string);
-		void unit_vector_registrator(void);
         cv::Mat image_transformer(cv::Mat);
         cv::Mat image_cropper(cv::Mat);
 
 	private:
         XmlRpc::XmlRpcValue ROBOT_PARAM;
 
-		static bool odom_callback_flag;
-		static bool first_flag;
-
-		constexpr static int Col = 0; //i↓  ...   ↑x
-		constexpr static int Row = 1; //j→  ... y←o
-        // constexpr int UV_O = 0, int UV_X = 1, int UV_Y = 2; // uv : unit vector
-        static std::map<std::string, int> UnitVector;
+		bool odom_callback_flag;
+		bool first_flag;
 
         int GRID_NUM, MANUAL_CROP_SIZE;
 		std::string FRAME_ID, CHILD_FRAME_ID;
-        static int crop_size;
-        double RANGE;
-        static double Hz, dt, grid_size;
+        int crop_size;
+        double RANGE, elapsed_time;
+        double Hz, dt, grid_size;
 
         ros::NodeHandle n;
         ros::NodeHandle nh;
@@ -96,12 +64,6 @@ class BEVImageGenerator
 		pcl::PointXYZ pt0, pt1, pt2;
 		pcl::PointCloud<pcl::PointXYZ> src_euqlid_3pts;
 		pcl::PointCloud<pcl::PointXYZ> dst_euqlid_3pts;
-
-		MyOdom d_my_odom;
-        static MyOdom pre_my_odom;
-        static MyOdom now_my_odom;
-        static Dynamics robot_param;
-		static UnitVectorOXY unit_vector;
 };
 
 #endif// __BEV_IMAGE_GENERATOR_H

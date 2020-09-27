@@ -19,10 +19,13 @@ BEVFlowEstimator::BEVFlowEstimator(void)
     nh.param("MAX_COUNT", MAX_COUNT, {30});
 	nh.param("FRAME_ID", FRAME_ID, {"odom"});
 	nh.param("CHILD_FRAME_ID", CHILD_FRAME_ID, {"base_footprint"});
+    nh.param("STEP_BORDER", STEP_BORDER, {5});
     // nh.param("");
     nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
     grid_subscriber = nh.subscribe("/bev/grid", 10, &BEVFlowEstimator::grid_callback, this);
+	odom_subscriber = nh.subscribe("/odom", 10, &BEVFlowEstimator::odom_callback, this);
+    /* pre_grid_image_subscriber = nh.subscribe("/bev/grid_image", 10, &BEVFlowEstimator::image_callback, this); */
 	flow_image_publisher = nh.advertise<sensor_msgs::Image>("/bev/flow_image", 10);
     /* grid_subscriber = nh.subscribe("/dynamic_cloud_detector/occupancy_grid", 10, &BEVFlowEstimator::grid_callback, this); */
 }
@@ -41,62 +44,66 @@ void BEVFlowEstimator::executor(void)
 
 		if(grid_callback_flag){
             initializer();
-            cv::Mat cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img);
-            cv::Mat cropped_transformed_grid_img = bev_image_generator.cropped_transformed_grid_img_generator(pre_input_grid_img);
-			cv::Mat bev_flow;
-			if(cropped_transformed_grid_img.size() == cropped_current_grid_img.size()){
-				cropped_transformed_grid_img.convertTo(cropped_transformed_grid_img, CV_8U, 255);
-				cropped_current_grid_img.convertTo(cropped_current_grid_img, CV_8U, 255);
+			cv::Mat cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img); // evry time newest
+
+			if(step % STEP_BORDER == STEP_BORDER - 1){
+        		cv::Mat cropped_transformed_grid_img = bev_image_generator.cropped_transformed_grid_img_generator(pre_input_grid_img, current_position, current_yaw, pre_position, pre_yaw);
+				cv::Mat bev_flow;
+				if(cropped_transformed_grid_img.size() == cropped_current_grid_img.size()){
+					cropped_transformed_grid_img.convertTo(cropped_transformed_grid_img, CV_8U, 255);
+					cropped_current_grid_img.convertTo(cropped_current_grid_img, CV_8U, 255);
+					
+					/* std::cout << "imshow" << std::endl; */
+					/* cv::namedWindow("cropped_transformed_grid_img", CV_WINDOW_AUTOSIZE); */
+					/* cv::imshow("cropped_transformed_grid_img", cropped_transformed_grid_img); */
+					/* cv::waitKey(1); */
+					/* cv::namedWindow("cropped_current_grid_img", CV_WINDOW_AUTOSIZE); */
+					/* cv::imshow("cropped_current_grid_img", cropped_current_grid_img); */
+					/* cv::waitKey(1); */
+
+					bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
+
+					// cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
+					cv::rotate(bev_flow, bev_flow, cv::ROTATE_90_COUNTERCLOCKWISE);
+					bev_flow.convertTo(bev_flow, CV_8U, 255);
+
+					/* std::cout << "imshow" << std::endl; */
+					/* cv::namedWindow("bev_flow", CV_WINDOW_AUTOSIZE); */
+					/* cv::imshow("bev_flow", bev_flow); */
+					/* cv::waitKey(1); */
+				}
 				
-				std::cout << "imshow" << std::endl;
-				cv::namedWindow("cropped_transformed_grid_img", CV_WINDOW_AUTOSIZE);
-				cv::imshow("cropped_transformed_grid_img", cropped_transformed_grid_img);
-				cv::waitKey(1);
-				cv::namedWindow("cropped_current_grid_img", CV_WINDOW_AUTOSIZE);
-				cv::imshow("cropped_current_grid_img", cropped_current_grid_img);
-				cv::waitKey(1);
+				if(IS_SAVE_IMAGE){
+					std::vector<int> params(2);
+					// .png
+					const std::string folder_name = PKG_PATH + "/data_" + std::to_string(SAVE_NUMBER);
+					params[0] = CV_IMWRITE_PNG_COMPRESSION;
+					params[1] = 9;
 
-            	bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
+					struct stat statBuf;
+					if(stat(folder_name.c_str(), &statBuf) == 0){
+						std::cout << "exist dir" << std::endl;
+					}else{
+						std::cout << "mkdir" << std::endl;
+						if(mkdir(folder_name.c_str(), 0755) != 0){
+							std::cout << "mkdir error" << std::endl;
+						}
+					}
+					/* cv::imwrite("/home/amsl/ros_catkin_ws/src/bev_converter/bev_img/data_" + std::to_string(SAVE_NUMBER) + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params); */
+					cv::imwrite(folder_name + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params);
+					/* std::cout << "SAVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl; */
+					i++;
+				}
 
-				// cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
-				cv::rotate(bev_flow, bev_flow, cv::ROTATE_90_COUNTERCLOCKWISE);
-				bev_flow.convertTo(bev_flow, CV_8U, 255);
-
-				/* std::cout << "imshow" << std::endl; */
-				/* cv::namedWindow("bev_flow", CV_WINDOW_AUTOSIZE); */
-				/* cv::imshow("bev_flow", bev_flow); */
-				/* cv::waitKey(1); */
+				std::cout << "pub img" << std::endl;
+				cv::Mat flow_img;
+				bev_flow.copyTo(flow_img);
+				sensor_msgs::ImagePtr flow_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", flow_img).toImageMsg();
+				flow_image_publisher.publish(flow_img_msg);
 			}
-            
-            if(IS_SAVE_IMAGE){
-                std::vector<int> params(2);
-                // .png
-                const std::string folder_name = PKG_PATH + "/data_" + std::to_string(SAVE_NUMBER);
-                params[0] = CV_IMWRITE_PNG_COMPRESSION;
-                params[1] = 9;
 
-                struct stat statBuf;
-                if(stat(folder_name.c_str(), &statBuf) == 0){
-                    std::cout << "exist dir" << std::endl;
-                }else{
-                    std::cout << "mkdir" << std::endl;
-                    if(mkdir(folder_name.c_str(), 0755) != 0){
-                        std::cout << "mkdir error" << std::endl;
-                    }
-                }
-                /* cv::imwrite("/home/amsl/ros_catkin_ws/src/bev_converter/bev_img/data_" + std::to_string(SAVE_NUMBER) + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params); */
-                cv::imwrite(folder_name + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params);
-                /* std::cout << "SAVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl; */
-                i++;
-            }
-
-			std::cout << "pub img" << std::endl;
-			cv::Mat flow_img;
-			bev_flow.copyTo(flow_img);
-			sensor_msgs::ImagePtr flow_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", flow_img).toImageMsg();
-			flow_image_publisher.publish(flow_img_msg);
-        	
-			pre_input_grid_img = input_grid_img;
+			step++;
+			// pre_input_grid_img = input_grid_img;
 		}
 
 		r.sleep();
@@ -113,6 +120,7 @@ void BEVFlowEstimator::formatter(void)
     dt = 1.0 / Hz;
     grid_size = RANGE / GRID_NUM;
 	first_flag = false;
+	step = 0;
 }
 
 
@@ -121,6 +129,22 @@ void BEVFlowEstimator::initializer(void)
 	/* std::cout << "initializer" << std::endl; */
 
     grid_callback_flag = false;
+}
+
+void BEVFlowEstimator::odom_callback(const nav_msgs::OdometryConstPtr &msg)
+{
+    nav_msgs::Odometry odom;
+	odom = *msg;
+    
+	current_position << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z;
+    current_yaw = tf::getYaw(odom.pose.pose.orientation);
+
+	if(step % 10 == 0){
+		pre_position = current_position;
+		pre_yaw = current_yaw;
+	}
+
+	odom_callback_flag = true;
 }
 
 
@@ -144,11 +168,10 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
         }
     }
 
-    if(!first_flag){
+    if(step % 10 == 0){
         pre_input_grid_img = input_grid_img;
     	first_flag = true;
     }
-	std::cout << "first_flag : " << first_flag << std::endl;
 
     grid_callback_flag = true;
 }
