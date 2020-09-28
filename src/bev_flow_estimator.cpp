@@ -53,13 +53,13 @@ void BEVFlowEstimator::executor(void)
 					cropped_transformed_grid_img.convertTo(cropped_transformed_grid_img, CV_8U, 255);
 					cropped_current_grid_img.convertTo(cropped_current_grid_img, CV_8U, 255);
 					
-					std::cout << "imshow" << std::endl;
-					cv::namedWindow("cropped_transformed_grid_img", CV_WINDOW_AUTOSIZE);
-					cv::imshow("cropped_transformed_grid_img", cropped_transformed_grid_img);
-					cv::waitKey(1);
-					cv::namedWindow("cropped_current_grid_img", CV_WINDOW_AUTOSIZE);
-					cv::imshow("cropped_current_grid_img", cropped_current_grid_img);
-					cv::waitKey(1);
+					/* std::cout << "imshow" << std::endl; */
+					/* cv::namedWindow("cropped_transformed_grid_img", CV_WINDOW_AUTOSIZE); */
+					/* cv::imshow("cropped_transformed_grid_img", cropped_transformed_grid_img); */
+					/* cv::waitKey(1); */
+					/* cv::namedWindow("cropped_current_grid_img", CV_WINDOW_AUTOSIZE); */
+					/* cv::imshow("cropped_current_grid_img", cropped_current_grid_img); */
+					/* cv::waitKey(1); */
 
 					bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
 
@@ -68,10 +68,16 @@ void BEVFlowEstimator::executor(void)
 					cv::flip(bev_flow, bev_flow, 0);
 					bev_flow.convertTo(bev_flow, CV_8U, 255);
 
-					std::cout << "imshow" << std::endl;
-					cv::namedWindow("bev_flow", CV_WINDOW_AUTOSIZE);
-					cv::imshow("bev_flow", bev_flow);
-					cv::waitKey(1);
+					/* std::cout << "imshow" << std::endl; */
+					/* cv::namedWindow("bev_flow", CV_WINDOW_AUTOSIZE); */
+					/* cv::imshow("bev_flow", bev_flow); */
+					/* cv::waitKey(1); */
+
+					std::cout << "pub img" << std::endl;
+					cv::Mat flow_img;
+					bev_flow.copyTo(flow_img);
+					sensor_msgs::ImagePtr flow_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", flow_img).toImageMsg();
+					flow_image_publisher.publish(flow_img_msg);
 				}
 				
 				if(IS_SAVE_IMAGE){
@@ -95,12 +101,6 @@ void BEVFlowEstimator::executor(void)
 					/* std::cout << "SAVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl; */
 					i++;
 				}
-
-				std::cout << "pub img" << std::endl;
-				cv::Mat flow_img;
-				bev_flow.copyTo(flow_img);
-				sensor_msgs::ImagePtr flow_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", flow_img).toImageMsg();
-				flow_image_publisher.publish(flow_img_msg);
 			}
 
 			step++;
@@ -221,9 +221,9 @@ cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat &pre_img, cv::Mat &cur_img)
 			cv::calcOpticalFlowPyrLK(pre_img, cur_img, pre_corners, cur_corners, features_found, features_errors);
 
 			for(size_t i = 0; i < features_found.size(); i++){
-				cv::Point flow_vector = cv::Point((int)(cur_corners[i].x - pre_corners[i].x), (int)(cur_corners[i].y - pre_corners[i].y));
-				flow_x.at<int>((int)pre_corners[i].x, (int)pre_corners[i].y) = flow_vector.x;
-				flow_y.at<int>((int)pre_corners[i].x, (int)pre_corners[i].y) = flow_vector.y;
+				cv::Point flow_vector = cv::Point((cur_corners[i].x - pre_corners[i].x), (cur_corners[i].y - pre_corners[i].y));
+				flow_x.at<float>(pre_corners[i].x, pre_corners[i].y) = flow_vector.x;
+				flow_y.at<float>(pre_corners[i].x, pre_corners[i].y) = flow_vector.y;
 			}
 		}
 
@@ -232,7 +232,7 @@ cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat &pre_img, cv::Mat &cur_img)
 
 		cv::Mat hsv_planes[3];
 		hsv_planes[0] = angle;
-		cv::normalize(magnitude, magnitude, 1.0, 0.0, cv::NORM_MINMAX);
+		cv::normalize(magnitude, magnitude, 0, 1, cv::NORM_MINMAX);
 		/* cv::normalize(magnitude, magnitude, 1.0, 0.0, cv::NORM_L1); */
 		hsv_planes[1] = magnitude;
 		hsv_planes[2] = cv::Mat::ones(magnitude.size(), CV_32F);
