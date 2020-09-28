@@ -27,10 +27,8 @@ BEVFlowEstimator::BEVFlowEstimator(void)
     nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
     grid_subscriber = nh.subscribe("/bev/grid", 10, &BEVFlowEstimator::grid_callback, this);
-	if(USE_CMD_VEL){
-		cmd_vel_subscriber = nh.subscribe(CMD_VEL_TOPIC, 10, &BEVFlowEstimator::cmd_vel_callback, this);
-	}else{
-		odom_subscriber = nh.subscribe("/odom", 10, &BEVFlowEstimator::odom_callback, this);
+	cmd_vel_subscriber = nh.subscribe(CMD_VEL_TOPIC, 10, &BEVFlowEstimator::cmd_vel_callback, this);
+	odom_subscriber = nh.subscribe("/odom", 10, &BEVFlowEstimator::odom_callback, this);
 	}
     // nh.param("");
     /* pre_grid_image_subscriber = nh.subscribe("/bev/grid_image", 10, &BEVFlowEstimator::image_callback, this); */
@@ -50,7 +48,7 @@ void BEVFlowEstimator::executor(void)
 	while(ros::ok()){
         bev_image_generator.initializer();
 
-		if(odom_callback_flag && grid_callback_flag){
+		if((odom_callback_flag && grid_callback_flag) || (cmd_vel_callback_flag && grid_callback_flag)){
 			cv::Mat cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img); // evry time newest
 
 			if(step % STEP_BORDER == STEP_BORDER - 1){
@@ -112,7 +110,10 @@ void BEVFlowEstimator::executor(void)
 					i = 0;
 				}
 			}
-
+			
+			odom_callback_flag = false;
+			cmd_vel_callback_flag = false;
+			grid_callback_flag = false;
 			step++;
 			std::cout << "step : " << step << std::endl;
 			// pre_input_grid_img = input_grid_img;
@@ -148,79 +149,85 @@ void BEVFlowEstimator::initializer(void)
 
 void BEVFlowEstimator::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr& msg)
 {
-	geometry_msgs::Twist cmd_vel = *msg;
-	static bool first_flag = false;
+	if(USE_CMD_VEL){
+		geometry_msgs::Twist cmd_vel = *msg;
+		static bool first_flag = false;
 
-	if(!first_flag){
-		initializer();
-		first_flag = true;
-	}
+		if(!first_flag){
+			initializer();
+			first_flag = true;
+		}
 
-	current_position.x() += cmd_vel.linear.x * dt * cos(current_position.z());
-	current_position.y() += cmd_vel.linear.x * dt * sin(current_position.z());
-	current_yaw += cmd_vel.angular.z * dt;
+		current_position.x() += cmd_vel.linear.x * dt * cos(current_position.z());
+		current_position.y() += cmd_vel.linear.x * dt * sin(current_position.z());
+		current_yaw += cmd_vel.angular.z * dt;
 
-	while(current_yaw >= M_PI){
-		current_yaw -= 2 * M_PI;
-	}
-	while(current_yaw <= -M_PI){
-		current_yaw += 2 * M_PI;
-	}
+		while(current_yaw >= M_PI){
+			current_yaw -= 2 * M_PI;
+		}
+		while(current_yaw <= -M_PI){
+			current_yaw += 2 * M_PI;
+		}
 
-	if(step % STEP_BORDER == 0){
-		initializer();
+		if(step % STEP_BORDER == 0){
+			initializer();
+		}
+
+		cmd_vel_callback_flag = true;
 	}
 }
 
 
 void BEVFlowEstimator::odom_callback(const nav_msgs::OdometryConstPtr &msg)
 {
-	odom = *msg;
-	static Eigen::Vector3d process_position;
-	static double process_yaw;
-	static bool first_flag = false;
-    
-	if(!first_flag){
-		current_position = Eigen::Vector3d::Zero();
-		pre_position = Eigen::Vector3d::Zero();
-		process_position = Eigen::Vector3d::Zero();
-		current_yaw = 0.0;
-		pre_yaw = 0.0;
-		process_yaw = 0.0;
-		first_flag = true;
-	}
-
-	if(IS_LOCAL){
-		current_position << odom.pose.pose.position.x - process_position.x(),
-						    odom.pose.pose.position.y - process_position.y(),
-							odom.pose.pose.position.z - process_position.z();
-		current_yaw = tf::getYaw(odom.pose.pose.orientation) - process_yaw;
-		if(step % STEP_BORDER == 0){
-			process_position << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z;
-			process_yaw = tf::getYaw(odom.pose.pose.orientation);
+	if(!USE_CMD_VEL){
+		odom = *msg;
+		static Eigen::Vector3d process_position;
+		static double process_yaw;
+		static bool first_flag = false;
+		
+		if(!first_flag){
+			current_position = Eigen::Vector3d::Zero();
+			pre_position = Eigen::Vector3d::Zero();
+			process_position = Eigen::Vector3d::Zero();
+			current_yaw = 0.0;
+			pre_yaw = 0.0;
+			process_yaw = 0.0;
+			first_flag = true;
 		}
-		/* current_position.x() += odom.pose.pose.position.x - process_position.x(); */
-		/* current_position.y() += odom.pose.pose.position.y - process_position.y(); */
-		/* current_position.z() += odom.pose.pose.position.z - process_position.z(); */
-		/* current_yaw += tf::getYaw(odom.pose.pose.orientation) - process_yaw; */
-		/* process_position = current_position; */
-		/* process_yaw = current_yaw; */
-		/* if(step % STEP_BORDER == 0){ */
-		/* 	current_position = Eigen::Vector3d::Zero(); */
-		/* 	pre_position = Eigen::Vector3d::Zero(); */
-		/* 	process_position = Eigen::Vector3d::Zero(); */
-        /*  */
-		/* } */
-	}else{
-		current_position << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z;
-		current_yaw = tf::getYaw(odom.pose.pose.orientation);
-		if(step % STEP_BORDER == 0){
-			pre_position = current_position;
-			pre_yaw = current_yaw;
-		}
-	}
 
-	odom_callback_flag = true;
+		if(IS_LOCAL){
+			current_position << odom.pose.pose.position.x - process_position.x(),
+								odom.pose.pose.position.y - process_position.y(),
+								odom.pose.pose.position.z - process_position.z();
+			current_yaw = tf::getYaw(odom.pose.pose.orientation) - process_yaw;
+			if(step % STEP_BORDER == 0){
+				process_position << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z;
+				process_yaw = tf::getYaw(odom.pose.pose.orientation);
+			}
+			/* current_position.x() += odom.pose.pose.position.x - process_position.x(); */
+			/* current_position.y() += odom.pose.pose.position.y - process_position.y(); */
+			/* current_position.z() += odom.pose.pose.position.z - process_position.z(); */
+			/* current_yaw += tf::getYaw(odom.pose.pose.orientation) - process_yaw; */
+			/* process_position = current_position; */
+			/* process_yaw = current_yaw; */
+			/* if(step % STEP_BORDER == 0){ */
+			/* 	current_position = Eigen::Vector3d::Zero(); */
+			/* 	pre_position = Eigen::Vector3d::Zero(); */
+			/* 	process_position = Eigen::Vector3d::Zero(); */
+			/*  */
+			/* } */
+		}else{
+			current_position << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z;
+			current_yaw = tf::getYaw(odom.pose.pose.orientation);
+			if(step % STEP_BORDER == 0){
+				pre_position = current_position;
+				pre_yaw = current_yaw;
+			}
+		}
+
+		odom_callback_flag = true;
+	}
 }
 
 
