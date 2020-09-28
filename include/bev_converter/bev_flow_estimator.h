@@ -40,11 +40,12 @@ class BEVFlowEstimator
 	private:
         XmlRpc::XmlRpcValue ROBOT_PARAM;
 
-		bool first_flag;
+		bool first_flag = false;
 		bool odom_callback_flag = false;
 		bool grid_callback_flag = false;
         bool IS_SAVE_IMAGE;
         bool IS_DENSE;
+        bool IS_LOCAL;
 
 		constexpr static int Col = 0; //i↓  ...   ↑x
 		constexpr static int Row = 1; //j→  ... y←o
@@ -67,8 +68,6 @@ class BEVFlowEstimator
 		ros::Publisher bev_transformed_image_publisher;
 		
         nav_msgs::OccupancyGrid bev_grid;
-
-        // Eigen::Vector3f zero_vector = Eigen::Vector3f::Zero();
 
         cv::Mat input_grid_img;
         cv::Mat pre_input_grid_img;

@@ -19,7 +19,8 @@ BEVFlowEstimator::BEVFlowEstimator(void)
     nh.param("MAX_COUNT", MAX_COUNT, {30});
 	nh.param("FRAME_ID", FRAME_ID, {"odom"});
 	nh.param("CHILD_FRAME_ID", CHILD_FRAME_ID, {"base_footprint"});
-    nh.param("STEP_BORDER", STEP_BORDER, {5});
+    nh.param("STEP_BORDER", STEP_BORDER, {2});
+    nh.param("IS_LOCAL", IS_LOCAL, {true});
     // nh.param("");
     nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
@@ -135,13 +136,35 @@ void BEVFlowEstimator::odom_callback(const nav_msgs::OdometryConstPtr &msg)
 {
     nav_msgs::Odometry odom;
 	odom = *msg;
+	static Eigen::Vector3d process_position;
+	static double process_yaw;
     
-	current_position << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z;
-    current_yaw = tf::getYaw(odom.pose.pose.orientation);
+	if(!first_flag){
+		current_position = Eigen::Vector3d::Zero();
+		pre_position = Eigen::Vector3d::Zero();
+		process_position = Eigen::Vector3d::Zero();
+		current_yaw = 0.0;
+		pre_yaw = 0.0;
+		process_yaw = 0.0;
+		first_flag = true;
+	}
 
-	if(step % STEP_BORDER == 0){
-		pre_position = current_position;
-		pre_yaw = current_yaw;
+	if(IS_LOCAL){
+		current_position << odom.pose.pose.position.x - process_position.x(),
+						    odom.pose.pose.position.y - process_position.y(),
+							odom.pose.pose.position.z - process_position.z();
+		current_yaw = tf::getYaw(odom.pose.pose.orientation) - process_yaw;
+		if(step % STEP_BORDER == 0){
+			process_position << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z;
+			process_yaw = tf::getYaw(odom.pose.pose.orientation);
+		}
+	}else{
+		current_position << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z;
+		current_yaw = tf::getYaw(odom.pose.pose.orientation);
+		if(step % STEP_BORDER == 0){
+			pre_position = current_position;
+			pre_yaw = current_yaw;
+		}
 	}
 
 	odom_callback_flag = true;
