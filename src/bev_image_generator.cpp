@@ -27,8 +27,6 @@ cv::Mat BEVImageGenerator::cropped_current_grid_img_generator(cv::Mat src_img)
 cv::Mat BEVImageGenerator::cropped_transformed_grid_img_generator(cv::Mat src_img, Eigen::Vector3d current_position, double current_yaw, Eigen::Vector3d last_position, double last_yaw)
 {
 	/* std::cout << "BEVImageGenerator::cropped_transformed_grid_img_generator" << std::endl; */
-	initializer();
-
 	double d_yaw = current_yaw - last_yaw;
 	d_yaw = atan2(sin(d_yaw), cos(d_yaw));
 	Eigen::Matrix3d r;
@@ -61,12 +59,6 @@ void BEVImageGenerator::formatter(void)
 	elapsed_time = 0.0;
     grid_size = RANGE / GRID_NUM;
 
-}
-
-
-void BEVImageGenerator::initializer(void)
-{
-	/* std::cout << "BEVImageGenerator::initializer" << std::endl; */
 	src_euqlid_3pts.points.resize(0);
 	pt0.x = 0.0;
 	pt0.y = 0.0;
@@ -80,6 +72,12 @@ void BEVImageGenerator::initializer(void)
 	src_euqlid_3pts.points.push_back(pt0);
 	src_euqlid_3pts.points.push_back(pt1);
 	src_euqlid_3pts.points.push_back(pt2);
+}
+
+
+void BEVImageGenerator::initializer(void)
+{
+	/* std::cout << "BEVImageGenerator::initializer" << std::endl; */
 }
 
 
