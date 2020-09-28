@@ -12,7 +12,7 @@
     <arg name="win_size" default="3"/>
     <arg name="max_count" default="30"/>
     <arg name="is_save_image" default="false"/>
-    <arg name="is_dense" default="true"/>
+    <arg name="is_dense" default="false"/>
     <arg name="save_data_num" default="1"/>
     <arg name="frame_id" default="odom"/>
     <arg name="child_frame_id" default="base_link"/>
