@@ -22,7 +22,7 @@ BEVFlowEstimator::BEVFlowEstimator(void)
     nh.param("STEP_BORDER", STEP_BORDER, {2});
     nh.param("IS_LOCAL", IS_LOCAL, {true});
     nh.param("USE_CMD_VEL", USE_CMD_VEL, {false});
-    nh.param("CMD_VEL", CMD_VEL_TOPIC, {"/cmd_vel"});
+    nh.param("CMD_VEL_TOPIC", CMD_VEL_TOPIC, {"/cmd_vel"});
     // nh.param("");
     nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
