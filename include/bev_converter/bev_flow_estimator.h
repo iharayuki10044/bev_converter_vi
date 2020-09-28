@@ -43,13 +43,11 @@ class BEVFlowEstimator
 
 		bool odom_callback_flag = false;
 		bool grid_callback_flag = false;
+		bool cmd_vel_callback_flag = false;
         bool IS_SAVE_IMAGE;
         bool IS_DENSE;
         bool IS_LOCAL;
 		bool USE_CMD_VEL;
-
-		constexpr static int Col = 0; //i↓  ...   ↑x
-		constexpr static int Row = 1; //j→  ... y←o
 		
 		std::string PKG_PATH, FRAME_ID, CHILD_FRAME_ID, CMD_VEL_TOPIC;
         int GRID_NUM, SAVE_NUMBER, FLOW_IMAGE_SIZE, FLOW_WINiDOW_SIZE, MANUAL_CROP_SIZE, MAX_CORNERS, WIN_SIZE, MAX_COUNT, STEP_BORDER;

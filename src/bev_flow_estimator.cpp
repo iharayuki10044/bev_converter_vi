@@ -29,9 +29,6 @@ BEVFlowEstimator::BEVFlowEstimator(void)
     grid_subscriber = nh.subscribe("/bev/grid", 10, &BEVFlowEstimator::grid_callback, this);
 	cmd_vel_subscriber = nh.subscribe(CMD_VEL_TOPIC, 10, &BEVFlowEstimator::cmd_vel_callback, this);
 	odom_subscriber = nh.subscribe("/odom", 10, &BEVFlowEstimator::odom_callback, this);
-	}
-    // nh.param("");
-    /* pre_grid_image_subscriber = nh.subscribe("/bev/grid_image", 10, &BEVFlowEstimator::image_callback, this); */
 	flow_image_publisher = nh.advertise<sensor_msgs::Image>("/bev/flow_image", 10);
     /* grid_subscriber = nh.subscribe("/dynamic_cloud_detector/occupancy_grid", 10, &BEVFlowEstimator::grid_callback, this); */
 }
@@ -111,9 +108,9 @@ void BEVFlowEstimator::executor(void)
 				}
 			}
 			
-			odom_callback_flag = false;
-			cmd_vel_callback_flag = false;
-			grid_callback_flag = false;
+			// odom_callback_flag = false;
+			// cmd_vel_callback_flag = false;
+			// grid_callback_flag = false;
 			step++;
 			std::cout << "step : " << step << std::endl;
 			// pre_input_grid_img = input_grid_img;
@@ -133,6 +130,10 @@ void BEVFlowEstimator::formatter(void)
     dt = 1.0 / Hz;
     grid_size = RANGE / GRID_NUM;
 	step = 0;
+
+	odom_callback_flag = false;
+	grid_callback_flag = false;
+	cmd_vel_callback_flag = false;
 }
 
 
