@@ -34,23 +34,24 @@ class BEVFlowEstimator
         void initializer(void);
 		void grid_callback(const nav_msgs::OccupancyGridConstPtr&);
 		void pre_grid_image_callback(const sensor_msgs::ImageConstPtr&);
+		void cmd_vel_callback(const geometry_msgs::Twist::ConstPtr&);
 		void odom_callback(const nav_msgs::OdometryConstPtr&);
         cv::Mat flow_estimator(cv::Mat&, cv::Mat&);
 
 	private:
         XmlRpc::XmlRpcValue ROBOT_PARAM;
 
-		bool first_flag = false;
 		bool odom_callback_flag = false;
 		bool grid_callback_flag = false;
         bool IS_SAVE_IMAGE;
         bool IS_DENSE;
         bool IS_LOCAL;
+		bool USE_CMD_VEL;
 
 		constexpr static int Col = 0; //i↓  ...   ↑x
 		constexpr static int Row = 1; //j→  ... y←o
 		
-		std::string PKG_PATH, FRAME_ID, CHILD_FRAME_ID;
+		std::string PKG_PATH, FRAME_ID, CHILD_FRAME_ID, CMD_VEL_TOPIC;
         int GRID_NUM, SAVE_NUMBER, FLOW_IMAGE_SIZE, FLOW_WINiDOW_SIZE, MANUAL_CROP_SIZE, MAX_CORNERS, WIN_SIZE, MAX_COUNT, STEP_BORDER;
 		int step;
         double RANGE, Hz, grid_size, dt, QUALITY_LEVEL, MIN_DISTANCE;
@@ -63,11 +64,13 @@ class BEVFlowEstimator
 		ros::Subscriber grid_subscriber;
 		ros::Subscriber pre_grid_image_subscriber;
 		ros::Subscriber odom_subscriber;
+		ros::Subscriber cmd_vel_subscriber;
 		// image_transport::Publisher flow_image_publisher;
 		ros::Publisher flow_image_publisher;
 		ros::Publisher bev_transformed_image_publisher;
 		
         nav_msgs::OccupancyGrid bev_grid;
+		nav_msgs::Odometry odom;
 
         cv::Mat input_grid_img;
         cv::Mat pre_input_grid_img;

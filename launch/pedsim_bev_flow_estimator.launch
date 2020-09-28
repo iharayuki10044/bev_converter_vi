@@ -13,6 +13,8 @@
     <arg name="max_count" default="30"/>
     <arg name="is_save_image" default="false"/>
     <arg name="is_dense" default="false"/>
+	<arg name="cmd_vel" default="/pedbot/control/cmd_vel"/>
+    <arg name="use_cmd_vel" default="true"/>
     <arg name="save_data_num" default="1"/>
     <arg name="frame_id" default="odom"/>
     <arg name="child_frame_id" default="base_footprint"/>
@@ -40,6 +42,8 @@
 		<param name="MAX_COUNT" value="$(arg max_count)" type="int"/>
 		<param name="IS_SAVE_IMAGE" value="$(arg is_save_image)" type="bool"/>
 		<param name="IS_DENSE" value="$(arg is_dense)" type="bool"/>
+		<param name="CMD_VEL_TOPIC" value="$(arg cmd_vel)" type="str"/>
+		<param name="USE_CMD_VEL" value="$(arg use_cmd_vel)" type="bool"/>
 		<param name="SAVE_NUMBER" value="$(arg save_data_num)" type="int"/>
 		<param name="FRAME_ID" value="$(arg frame_id)" type="str"/>
 		<param name="CHILD_FRAME_ID" value="$(arg child_frame_id)" type="str"/>
