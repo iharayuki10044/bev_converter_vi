@@ -88,12 +88,12 @@ cv::Mat BEVImageGenerator::image_transformer(cv::Mat src_img)
 	float alpha = 1.0;
     pcl::transformPointCloud(src_euqlid_3pts, dst_euqlid_3pts, affine_transform);
 
-	const cv::Point2f src_pt[] = {cv::Point2f(src_euqlid_3pts.points[0].x / GRID_NUM, src_euqlid_3pts.points[0].y / GRID_NUM),
-								  cv::Point2f(src_euqlid_3pts.points[1].x / GRID_NUM, src_euqlid_3pts.points[1].y / GRID_NUM),
-								  cv::Point2f(src_euqlid_3pts.points[2].x / GRID_NUM, src_euqlid_3pts.points[2].y / GRID_NUM)};
-	const cv::Point2f dst_pt[] = {cv::Point2f(alpha * dst_euqlid_3pts.points[0].x / GRID_NUM, alpha * dst_euqlid_3pts.points[0].y / GRID_NUM),
-								  cv::Point2f(alpha * dst_euqlid_3pts.points[1].x / GRID_NUM, alpha * dst_euqlid_3pts.points[1].y / GRID_NUM),
-								  cv::Point2f(alpha * dst_euqlid_3pts.points[2].x / GRID_NUM, alpha * dst_euqlid_3pts.points[2].y / GRID_NUM)};
+	const cv::Point2f src_pt[] = {cv::Point2f(src_euqlid_3pts.points[0].x / grid_size, src_euqlid_3pts.points[0].y / grid_size),
+								  cv::Point2f(src_euqlid_3pts.points[1].x / grid_size, src_euqlid_3pts.points[1].y / grid_size),
+								  cv::Point2f(src_euqlid_3pts.points[2].x / grid_size, src_euqlid_3pts.points[2].y / grid_size)};
+	const cv::Point2f dst_pt[] = {cv::Point2f(alpha * dst_euqlid_3pts.points[0].x / grid_size, alpha * dst_euqlid_3pts.points[0].y / grid_size),
+								  cv::Point2f(alpha * dst_euqlid_3pts.points[1].x / grid_size, alpha * dst_euqlid_3pts.points[1].y / grid_size),
+								  cv::Point2f(alpha * dst_euqlid_3pts.points[2].x / grid_size, alpha * dst_euqlid_3pts.points[2].y / grid_size)};
 
 	/* const cv::Point2f src_pt[] = {cv::Point2f(src_euqlid_3pts.points[0].x, src_euqlid_3pts.points[0].y), */
 	/* 							  cv::Point2f(src_euqlid_3pts.points[1].x, src_euqlid_3pts.points[1].y), */

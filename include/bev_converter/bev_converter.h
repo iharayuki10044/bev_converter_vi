@@ -50,6 +50,7 @@ class BEVConverter
 
         double RANGE;
         int GRID_NUM;
+        int pc_seq;
         float grid_size;
 		std::string CHILD_FRAME_ID;
 

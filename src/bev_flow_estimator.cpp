@@ -45,7 +45,7 @@ void BEVFlowEstimator::executor(void)
 	while(ros::ok()){
         bev_image_generator.initializer();
 
-		if((odom_callback_flag && grid_callback_flag) || (cmd_vel_callback_flag && grid_callback_flag)){
+		if((grid_callback_flag)){
 			cv::Mat cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img); // evry time newest
 
 			if(step % STEP_BORDER == STEP_BORDER - 1){
@@ -79,6 +79,7 @@ void BEVFlowEstimator::executor(void)
 					cv::Mat flow_img;
 					bev_flow.copyTo(flow_img);
 					sensor_msgs::ImagePtr flow_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", flow_img).toImageMsg();
+					flow_img_msg->header.seq = bev_seq;
 					flow_image_publisher.publish(flow_img_msg);
 					step = 0;
 				}
@@ -108,9 +109,7 @@ void BEVFlowEstimator::executor(void)
 				}
 			}
 			
-			// odom_callback_flag = false;
-			// cmd_vel_callback_flag = false;
-			// grid_callback_flag = false;
+			grid_callback_flag = false;
 			step++;
 			std::cout << "step : " << step << std::endl;
 			// pre_input_grid_img = input_grid_img;
@@ -237,7 +236,7 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 	/* std::cout << "grid_callback" << std::endl; */
 
 	nav_msgs::OccupancyGrid bev_grid = *msg;
-    
+    bev_seq = bev_grid.header.seq;
     
     input_grid_img = cv::Mat::zeros(cv::Size(bev_grid.info.width,bev_grid.info.height), CV_8UC1);
 

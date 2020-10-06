@@ -31,6 +31,7 @@ void BEVConverter::execution(void)
             converter();
 
     		bev_grid.header.stamp = ros::Time::now();
+    		bev_grid.header.seq = pc_seq;
     		bev_grid.info.map_load_time = ros::Time::now();
     		bev_grid_publisher.publish(bev_grid);
             
@@ -49,6 +50,7 @@ void BEVConverter::execution(void)
 void BEVConverter::pc_callback(const sensor_msgs::PointCloud2ConstPtr &msg)
 {
     sensor_msgs::PointCloud2 input_pc;
+	pc_seq = input_pc.header.seq;
 
     input_pc = *msg;
 	pcl::fromROSMsg(input_pc, *pcl_input_pc);
@@ -94,6 +96,7 @@ void BEVConverter::odom_callback(const nav_msgs::OdometryConstPtr &msg)
 
 void BEVConverter::formatter(void)
 {
+	pc_seq = 0;
     bev_grid.header.seq = 0;
     bev_grid.header.frame_id = CHILD_FRAME_ID;
     bev_grid.info.resolution = (float)(RANGE / GRID_NUM);
