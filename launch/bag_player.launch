@@ -4,5 +4,6 @@
 
 	<node pkg="rosbag" name="player" type="play" args="--clock /home/amsl/bagfiles/cats/2019/left_start.bag"/>
 
-	<node pkg="rviz" name="rviz" type="rviz" args="-d /home/amsl/ros_catkin_ws/src/bev_converter/rviz/rwrc19_cats.rviz"/>
+	<!-- <node pkg="rviz" name="rviz" type="rviz" args="&#45;d /home/amsl/ros_catkin_ws/src/bev_converter/rviz/rwrc19_cats.rviz"/> -->
+	<node pkg="rviz" name="rviz" type="rviz" args="-d /home/amsl/ros_catkin_ws/src/bev_converter/rviz/si2020.rviz"/>
 </launch>
