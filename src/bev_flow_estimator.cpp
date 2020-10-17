@@ -306,8 +306,8 @@ cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat &pre_img, cv::Mat &cur_img)
 
 			for(size_t i = 0; i < features_found.size(); i++){
 				cv::Point flow_vector = cv::Point((cur_corners[i].x - pre_corners[i].x), (cur_corners[i].y - pre_corners[i].y));
-				flow_x.at<float>(pre_corners[i].x, pre_corners[i].y) = flow_vector.x;
-				flow_y.at<float>(pre_corners[i].x, pre_corners[i].y) = flow_vector.y;
+				flow_x.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector.x;
+				flow_y.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector.y;
 			}
 		}
 
