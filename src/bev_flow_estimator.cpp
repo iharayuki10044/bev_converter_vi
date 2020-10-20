@@ -330,13 +330,11 @@ cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat &pre_img, cv::Mat &cur_img)
 			std::cout << "pear_corner_num:" << pear_corner_num << std::endl;
 			for(size_t i = 0; i < pear_corner_num; i++){
 				std::cout << "i:" << i << std::endl;
-				cv::Point flow_vector = cv::Point((cur_corners[i].x - pre_corners[i].x), (cur_corners[i].y - pre_corners[i].y));
+				cv::Point flow_vector = cv::Point((cur_corners[i].x - pre_corners[i].x), -(cur_corners[i].y - pre_corners[i].y));
 				flow_x.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector.x;
 				flow_y.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector.y;
 			}
 
-			magnitude = cv::Mat::zeros(img_size, img_size, CV_32F);
-			angle = cv::Mat::zeros(img_size, img_size, CV_32F);
 			cv::cartToPolar(flow_x, flow_y, magnitude, angle, true);
 
 			std::cout << "cartToPolar" << std::endl;
