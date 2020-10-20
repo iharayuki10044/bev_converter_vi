@@ -50,7 +50,6 @@ void BEVFlowEstimator::executor(void)
 
 			if(step % STEP_BORDER == STEP_BORDER - 1){
         		cv::Mat cropped_transformed_grid_img = bev_image_generator.cropped_transformed_grid_img_generator(pre_input_grid_img, current_position, current_yaw, pre_position, pre_yaw);
-				cv::Mat bev_flow;
 				if(cropped_transformed_grid_img.size() == cropped_current_grid_img.size()){
 					cropped_transformed_grid_img.convertTo(cropped_transformed_grid_img, CV_8U, 255);
 					cropped_current_grid_img.convertTo(cropped_current_grid_img, CV_8U, 255);
@@ -63,7 +62,8 @@ void BEVFlowEstimator::executor(void)
 					/* cv::imshow("cropped_current_grid_img", cropped_current_grid_img); */
 					/* cv::waitKey(1); */
 
-					bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
+					cv::Mat bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
+					std::cout << "flow comp!" << std::endl;
 
 					// cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
 					// cv::rotate(bev_flow, bev_flow, cv::ROTATE_90_COUNTERCLOCKWISE);
@@ -83,30 +83,30 @@ void BEVFlowEstimator::executor(void)
 					flow_img_msg->header.seq = bev_seq;
 					flow_image_publisher.publish(flow_img_msg);
 					step = 0;
-				}
 				
-				if(IS_SAVE_IMAGE){
-					std::vector<int> params(2);
-					// .png
-					const std::string folder_name = PKG_PATH + "/data_" + std::to_string(SAVE_NUMBER);
-					params[0] = CV_IMWRITE_PNG_COMPRESSION;
-					params[1] = 9;
+					if(IS_SAVE_IMAGE){
+						std::vector<int> params(2);
+						// .png
+						const std::string folder_name = PKG_PATH + "/data_" + std::to_string(SAVE_NUMBER);
+						params[0] = CV_IMWRITE_PNG_COMPRESSION;
+						params[1] = 9;
 
-					struct stat statBuf;
-					if(stat(folder_name.c_str(), &statBuf) == 0){
-						std::cout << "exist dir" << std::endl;
-					}else{
-						std::cout << "mkdir" << std::endl;
-						if(mkdir(folder_name.c_str(), 0755) != 0){
-							std::cout << "mkdir error" << std::endl;
+						struct stat statBuf;
+						if(stat(folder_name.c_str(), &statBuf) == 0){
+							std::cout << "exist dir" << std::endl;
+						}else{
+							std::cout << "mkdir" << std::endl;
+							if(mkdir(folder_name.c_str(), 0755) != 0){
+								std::cout << "mkdir error" << std::endl;
+							}
 						}
+						/* cv::imwrite("/home/amsl/ros_catkin_ws/src/bev_converter/bev_img/data_" + std::to_string(SAVE_NUMBER) + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params); */
+						cv::imwrite(folder_name + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params);
+						/* std::cout << "SAVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl; */
+						i++;
+					}else{
+						i = 0;
 					}
-					/* cv::imwrite("/home/amsl/ros_catkin_ws/src/bev_converter/bev_img/data_" + std::to_string(SAVE_NUMBER) + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params); */
-					cv::imwrite(folder_name + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params);
-					/* std::cout << "SAVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl; */
-					i++;
-				}else{
-					i = 0;
 				}
 			}
 			
@@ -263,11 +263,27 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat &pre_img, cv::Mat &cur_img)
 {
 	std::cout << "flow_estimator" << std::endl;
+	flow_flag = false;
 
     cv::Mat flow_bgr;
 	int img_size = GRID_NUM - 2 * MANUAL_CROP_SIZE;
 	cv::Mat flow_x = cv::Mat::zeros(img_size, img_size, CV_32F);
 	cv::Mat flow_y = cv::Mat::zeros(img_size, img_size, CV_32F);
+
+
+	cv::Mat magnitude = cv::Mat::zeros(img_size, img_size, CV_32F);
+	cv::Mat angle = cv::Mat::zeros(img_size, img_size, CV_32F);
+	cv::cartToPolar(flow_x, flow_y, magnitude, angle, true);
+	cv::Mat hsv_planes[3] = {cv::Mat::zeros(img_size, img_size, CV_32F),
+							 cv::Mat::zeros(img_size, img_size, CV_32F),
+							 cv::Mat::zeros(img_size, img_size, CV_32F)};
+	hsv_planes[0] = angle;
+	cv::normalize(magnitude, magnitude, 0, 1, cv::NORM_MINMAX);
+	hsv_planes[1] = magnitude;
+	hsv_planes[2] = cv::Mat::ones(magnitude.size(), CV_32F);
+	cv::Mat hsv;
+	cv::merge(hsv_planes, 3, hsv);
+	cv::cvtColor(hsv, flow_bgr, cv::COLOR_HSV2BGR);
 
 	if(IS_DENSE){
 		cv::Ptr<cv::superres::DenseOpticalFlowExt> optical_flow = cv::superres::createOptFlow_DualTVL1();
@@ -311,28 +327,34 @@ cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat &pre_img, cv::Mat &cur_img)
 			}else{
 				pear_corner_num = pre_corners.size();
 			}
+			std::cout << "pear_corner_num:" << pear_corner_num << std::endl;
 			for(size_t i = 0; i < pear_corner_num; i++){
+				std::cout << "i:" << i << std::endl;
 				cv::Point flow_vector = cv::Point((cur_corners[i].x - pre_corners[i].x), (cur_corners[i].y - pre_corners[i].y));
 				flow_x.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector.x;
 				flow_y.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector.y;
 			}
+
+			magnitude = cv::Mat::zeros(img_size, img_size, CV_32F);
+			angle = cv::Mat::zeros(img_size, img_size, CV_32F);
+			cv::cartToPolar(flow_x, flow_y, magnitude, angle, true);
+
+			std::cout << "cartToPolar" << std::endl;
+			hsv_planes[0] = angle;
+			cv::normalize(magnitude, magnitude, 0, 1, cv::NORM_MINMAX);
+			/* cv::normalize(magnitude, magnitude, 1.0, 0.0, cv::NORM_L1); */
+			hsv_planes[1] = magnitude;
+			hsv_planes[2] = cv::Mat::ones(magnitude.size(), CV_32F);
+			
+			std::cout << "cv::merge" << std::endl;
+			cv::merge(hsv_planes, 3, hsv);
+			std::cout << "cvtColor" << std::endl;
+			cv::cvtColor(hsv, flow_bgr, cv::COLOR_HSV2BGR);
 		}
-
-		cv::Mat magnitude, angle;
-		cv::cartToPolar(flow_x, flow_y, magnitude, angle, true);
-
-		cv::Mat hsv_planes[3];
-		hsv_planes[0] = angle;
-		cv::normalize(magnitude, magnitude, 0, 1, cv::NORM_MINMAX);
-		/* cv::normalize(magnitude, magnitude, 1.0, 0.0, cv::NORM_L1); */
-		hsv_planes[1] = magnitude;
-		hsv_planes[2] = cv::Mat::ones(magnitude.size(), CV_32F);
-		
-		cv::Mat hsv;
-		cv::merge(hsv_planes, 3, hsv);
-
-		cv::cvtColor(hsv, flow_bgr, cv::COLOR_HSV2BGR);
 	}
+	
+	std::cout << "flow_bgr done" << std::endl;
+	flow_flag = true;
 
     return flow_bgr;
 }

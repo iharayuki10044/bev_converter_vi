@@ -2,7 +2,8 @@
 <launch>
 	<include file="$(find cats)/launch/robot_state.launch"/>
 
-	<node pkg="rosbag" name="player" type="play" args="--clock /home/amsl/bagfiles/cats/2019/left_start.bag -r 0.5"/>
+	<!-- <node pkg="rosbag" name="player" type="play" args="&#45;&#45;clock /home/amsl/bagfiles/cats/2019/left_start.bag &#45;r 0.5"/> -->
+	<node pkg="rosbag" name="player" type="play" args="--clock /home/amsl/bagfiles/cats/2019/1021/2019-10-21-15-11-29.bag -r 0.5 -s 1290"/>
 
 	<!-- <node pkg="rviz" name="rviz" type="rviz" args="&#45;d /home/amsl/ros_catkin_ws/src/bev_converter/rviz/rwrc19_cats.rviz"/> -->
 	<node pkg="rviz" name="rviz" type="rviz" args="-d /home/amsl/ros_catkin_ws/src/bev_converter/rviz/si2020.rviz"/>
