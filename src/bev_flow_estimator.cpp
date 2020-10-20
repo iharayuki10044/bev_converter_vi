@@ -304,7 +304,14 @@ cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat &pre_img, cv::Mat &cur_img)
 			std::vector<float> features_errors;
 			cv::calcOpticalFlowPyrLK(pre_img, cur_img, pre_corners, cur_corners, features_found, features_errors);
 
-			for(size_t i = 0; i < features_found.size(); i++){
+			/* for(size_t i = 0; i < features_found.size(); i++){ */
+			size_t pear_corner_num = 0;
+			if(pre_corners.size() >= cur_corners.size()){
+				pear_corner_num = cur_corners.size();
+			}else{
+				pear_corner_num = pre_corners.size();
+			}
+			for(size_t i = 0; i < pear_corner_num; i++){
 				cv::Point flow_vector = cv::Point((cur_corners[i].x - pre_corners[i].x), (cur_corners[i].y - pre_corners[i].y));
 				flow_x.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector.x;
 				flow_y.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector.y;
