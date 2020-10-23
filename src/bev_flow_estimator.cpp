@@ -30,7 +30,6 @@ BEVFlowEstimator::BEVFlowEstimator(void)
 	cmd_vel_subscriber = nh.subscribe(CMD_VEL_TOPIC, 10, &BEVFlowEstimator::cmd_vel_callback, this);
 	odom_subscriber = nh.subscribe("/odom", 10, &BEVFlowEstimator::odom_callback, this);
 	flow_image_publisher = nh.advertise<sensor_msgs::Image>("/bev/flow_image", 10);
-    /* grid_subscriber = nh.subscribe("/dynamic_cloud_detector/occupancy_grid", 10, &BEVFlowEstimator::grid_callback, this); */
 }
 
 
@@ -84,6 +83,7 @@ void BEVFlowEstimator::executor(void)
 					flow_image_publisher.publish(flow_img_msg);
 					step = 0;
 				
+
 					if(IS_SAVE_IMAGE){
 						std::vector<int> params(2);
 						// .png
@@ -107,6 +107,11 @@ void BEVFlowEstimator::executor(void)
 					}else{
 						i = 0;
 					}
+
+					cropped_current_grid_img.release();
+					cropped_transformed_grid_img.release();
+					bev_flow.release();
+					flow_img.release();
 				}
 			}
 			
@@ -206,18 +211,6 @@ void BEVFlowEstimator::odom_callback(const nav_msgs::OdometryConstPtr &msg)
 				process_position << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z;
 				process_yaw = tf::getYaw(odom.pose.pose.orientation);
 			}
-			/* current_position.x() += odom.pose.pose.position.x - process_position.x(); */
-			/* current_position.y() += odom.pose.pose.position.y - process_position.y(); */
-			/* current_position.z() += odom.pose.pose.position.z - process_position.z(); */
-			/* current_yaw += tf::getYaw(odom.pose.pose.orientation) - process_yaw; */
-			/* process_position = current_position; */
-			/* process_yaw = current_yaw; */
-			/* if(step % STEP_BORDER == 0){ */
-			/* 	current_position = Eigen::Vector3d::Zero(); */
-			/* 	pre_position = Eigen::Vector3d::Zero(); */
-			/* 	process_position = Eigen::Vector3d::Zero(); */
-			/*  */
-			/* } */
 		}else{
 			current_position << odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z;
 			current_yaw = tf::getYaw(odom.pose.pose.orientation);
@@ -244,10 +237,6 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
     for(unsigned int col = 0; col < bev_grid.info.height; col++){
         for(unsigned int row = 0; row < bev_grid.info.width; row++){
             unsigned int i = row + (bev_grid.info.height - col - 1) * bev_grid.info.width;
-            /* int intensity = 205; */
-            /* if(0 <= bev_grid.data[i] && bev_grid.data[i] <= 100){ */
-            /*     intensity = round((float)(100.0 - bev_grid.data[i]) * 2.55); */
-            /* } */
             input_grid_img.at<unsigned char>(col, row) = bev_grid.data[i];
         }
     }
@@ -260,7 +249,7 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 }
 
 
-cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat &pre_img, cv::Mat &cur_img)
+cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 {
 	std::cout << "flow_estimator" << std::endl;
 	flow_flag = false;
@@ -269,21 +258,6 @@ cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat &pre_img, cv::Mat &cur_img)
 	int img_size = GRID_NUM - 2 * MANUAL_CROP_SIZE;
 	cv::Mat flow_x = cv::Mat::zeros(img_size, img_size, CV_32F);
 	cv::Mat flow_y = cv::Mat::zeros(img_size, img_size, CV_32F);
-
-
-	cv::Mat magnitude = cv::Mat::zeros(img_size, img_size, CV_32F);
-	cv::Mat angle = cv::Mat::zeros(img_size, img_size, CV_32F);
-	cv::cartToPolar(flow_x, flow_y, magnitude, angle, true);
-	cv::Mat hsv_planes[3] = {cv::Mat::zeros(img_size, img_size, CV_32F),
-							 cv::Mat::zeros(img_size, img_size, CV_32F),
-							 cv::Mat::zeros(img_size, img_size, CV_32F)};
-	hsv_planes[0] = angle;
-	cv::normalize(magnitude, magnitude, 0, 1, cv::NORM_MINMAX);
-	hsv_planes[1] = magnitude;
-	hsv_planes[2] = cv::Mat::ones(magnitude.size(), CV_32F);
-	cv::Mat hsv;
-	cv::merge(hsv_planes, 3, hsv);
-	cv::cvtColor(hsv, flow_bgr, cv::COLOR_HSV2BGR);
 
 	if(IS_DENSE){
 		cv::Ptr<cv::superres::DenseOpticalFlowExt> optical_flow = cv::superres::createOptFlow_DualTVL1();
@@ -320,39 +294,55 @@ cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat &pre_img, cv::Mat &cur_img)
 			std::vector<float> features_errors;
 			cv::calcOpticalFlowPyrLK(pre_img, cur_img, pre_corners, cur_corners, features_found, features_errors);
 
-			/* for(size_t i = 0; i < features_found.size(); i++){ */
-			size_t pear_corner_num = 0;
-			if(pre_corners.size() >= cur_corners.size()){
-				pear_corner_num = cur_corners.size();
-			}else{
-				pear_corner_num = pre_corners.size();
-			}
-			std::cout << "pear_corner_num:" << pear_corner_num << std::endl;
-			for(size_t i = 0; i < pear_corner_num; i++){
-				std::cout << "i:" << i << std::endl;
+			for(size_t i = 0; i < features_found.size(); i++){
+			/* size_t pear_corner_num = 0; */
+			/* if(pre_corners.size() >= cur_corners.size()){ */
+			/* 	pear_corner_num = cur_corners.size(); */
+			/* }else{ */
+			/* 	pear_corner_num = pre_corners.size(); */
+			/* } */
+			/* std::cout << "pear_corner_num:" << pear_corner_num << std::endl; */
+			/* for(size_t i = 0; i < pear_corner_num; i++){ */
+			/* 	std::cout << "i:" << i << std::endl; */
 				cv::Point flow_vector = cv::Point((cur_corners[i].x - pre_corners[i].x), -(cur_corners[i].y - pre_corners[i].y));
 				flow_x.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector.x;
 				flow_y.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector.y;
 			}
 
+			cv::Mat magnitude, angle;
 			cv::cartToPolar(flow_x, flow_y, magnitude, angle, true);
 
 			std::cout << "cartToPolar" << std::endl;
+			cv::Mat hsv_planes[3];
 			hsv_planes[0] = angle;
 			cv::normalize(magnitude, magnitude, 0, 1, cv::NORM_MINMAX);
 			/* cv::normalize(magnitude, magnitude, 1.0, 0.0, cv::NORM_L1); */
 			hsv_planes[1] = magnitude;
 			hsv_planes[2] = cv::Mat::ones(magnitude.size(), CV_32F);
 			
+			cv::Mat hsv;
 			std::cout << "cv::merge" << std::endl;
 			cv::merge(hsv_planes, 3, hsv);
 			std::cout << "cvtColor" << std::endl;
 			cv::cvtColor(hsv, flow_bgr, cv::COLOR_HSV2BGR);
+
+			magnitude.release();
+			std::cout << "magnitude.release()" << std::endl;
+			angle.release();
+			std::cout << "angle.release()" << std::endl;
+			hsv_planes[0].release();
+			hsv_planes[1].release();
+			hsv_planes[2].release();
+			std::cout << "hsv_plane.release()" << std::endl;
+			hsv.release();
+			std::cout << "hsv.release()" << std::endl;
+			features_found.clear();
+			features_errors.clear();
+			std::cout << "features cleared" << std::endl;
 		}
 	}
 	
 	std::cout << "flow_bgr done" << std::endl;
-	flow_flag = true;
 
     return flow_bgr;
 }

@@ -91,19 +91,9 @@ cv::Mat BEVImageGenerator::image_transformer(cv::Mat src_img)
 	const cv::Point2f src_pt[] = {cv::Point2f(src_euqlid_3pts.points[0].x / grid_size, src_euqlid_3pts.points[0].y / grid_size),
 								  cv::Point2f(src_euqlid_3pts.points[1].x / grid_size, src_euqlid_3pts.points[1].y / grid_size),
 								  cv::Point2f(src_euqlid_3pts.points[2].x / grid_size, src_euqlid_3pts.points[2].y / grid_size)};
-	/* const cv::Point2f dst_pt[] = {cv::Point2f(alpha * dst_euqlid_3pts.points[0].x / grid_size, alpha * dst_euqlid_3pts.points[0].y / grid_size), */
-	/* 							  cv::Point2f(alpha * dst_euqlid_3pts.points[1].x / grid_size, alpha * dst_euqlid_3pts.points[1].y / grid_size), */
-	/* 							  cv::Point2f(alpha * dst_euqlid_3pts.points[2].x / grid_size, alpha * dst_euqlid_3pts.points[2].y / grid_size)}; */
-
 	const cv::Point2f dst_pt[] = {cv::Point2f(-alpha * dst_euqlid_3pts.points[0].y / grid_size, -alpha * dst_euqlid_3pts.points[0].x / grid_size),
 								  cv::Point2f(-alpha * dst_euqlid_3pts.points[1].x / grid_size, -alpha * dst_euqlid_3pts.points[1].x / grid_size),
 								  cv::Point2f(-alpha * dst_euqlid_3pts.points[2].x / grid_size, -alpha * dst_euqlid_3pts.points[2].x / grid_size)};
-	/* const cv::Point2f src_pt[] = {cv::Point2f(src_euqlid_3pts.points[0].x, src_euqlid_3pts.points[0].y), */
-	/* 							  cv::Point2f(src_euqlid_3pts.points[1].x, src_euqlid_3pts.points[1].y), */
-	/* 							  cv::Point2f(src_euqlid_3pts.points[2].x, src_euqlid_3pts.points[2].y)}; */
-	/* const cv::Point2f dst_pt[] = {cv::Point2f(dst_euqlid_3pts.points[0].x, dst_euqlid_3pts.points[0].y), */
-	/* 							  cv::Point2f(dst_euqlid_3pts.points[1].x, dst_euqlid_3pts.points[1].y), */
-	/* 							  cv::Point2f(dst_euqlid_3pts.points[2].x, dst_euqlid_3pts.points[2].y)}; */
     const cv::Mat affine_matrix = cv::getAffineTransform(src_pt, dst_pt);
     cv::Mat dst_img;
     cv::warpAffine(src_img, dst_img, affine_matrix, src_img.size(), cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
