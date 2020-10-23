@@ -68,7 +68,7 @@ void BEVFlowEstimator::executor(void)
 					// cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
 					// cv::rotate(bev_flow, bev_flow, cv::ROTATE_90_COUNTERCLOCKWISE);
 					cv::rotate(bev_flow, bev_flow, cv::ROTATE_180);
-					cv::flip(bev_flow, bev_flow, 1);
+					/* cv::flip(bev_flow, bev_flow, 1); */
 					bev_flow.convertTo(bev_flow, CV_8U, 255);
 
 					/* std::cout << "imshow" << std::endl; */
