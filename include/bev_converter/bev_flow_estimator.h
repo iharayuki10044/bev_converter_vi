@@ -36,7 +36,8 @@ class BEVFlowEstimator
 		void pre_grid_image_callback(const sensor_msgs::ImageConstPtr&);
 		void cmd_vel_callback(const geometry_msgs::Twist::ConstPtr&);
 		void odom_callback(const nav_msgs::OdometryConstPtr&);
-        cv::Mat flow_estimator(cv::Mat, cv::Mat);
+        // cv::Mat flow_estimator(cv::Mat, cv::Mat);
+        bool flow_estimator(cv::Mat, cv::Mat);
 
 	private:
         XmlRpc::XmlRpcValue ROBOT_PARAM;
@@ -73,6 +74,7 @@ class BEVFlowEstimator
 
         cv::Mat input_grid_img;
         cv::Mat pre_input_grid_img;
+		cv::Mat bev_flow;
 
 		Eigen::Vector3d current_position;
 		Eigen::Vector3d pre_position;

@@ -9,8 +9,8 @@
     <arg name="max_corners" default="20"/>
     <arg name="quality_level" default="0.05"/>
     <arg name="min_distance" default="5.0"/>
-    <arg name="win_size" default="3"/>
-    <arg name="max_count" default="30"/>
+    <arg name="win_size" default="4"/>
+    <arg name="max_count" default="10"/>
     <arg name="is_save_image" default="false"/>
     <arg name="is_dense" default="false"/>
     <arg name="save_data_num" default="1"/>

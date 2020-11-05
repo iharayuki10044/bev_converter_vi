@@ -44,7 +44,7 @@ void BEVFlowEstimator::executor(void)
 	while(ros::ok()){
         bev_image_generator.initializer();
 
-		if((grid_callback_flag)){
+		if((grid_callback_flag && cmd_vel_callback_flag) || (grid_callback_flag && odom_callback_flag)){
 			cv::Mat cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img); // evry time newest
 
 			if(step % STEP_BORDER == STEP_BORDER - 1){
@@ -61,61 +61,66 @@ void BEVFlowEstimator::executor(void)
 					/* cv::imshow("cropped_current_grid_img", cropped_current_grid_img); */
 					/* cv::waitKey(1); */
 
-					cv::Mat bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
+					// bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
+					bool flow_comp = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
 					std::cout << "flow comp!" << std::endl;
 
-					// cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
-					// cv::rotate(bev_flow, bev_flow, cv::ROTATE_90_COUNTERCLOCKWISE);
-					cv::rotate(bev_flow, bev_flow, cv::ROTATE_180);
-					/* cv::flip(bev_flow, bev_flow, 1); */
-					bev_flow.convertTo(bev_flow, CV_8U, 255);
+					if(flow_comp){
+						// cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
+						// cv::rotate(bev_flow, bev_flow, cv::ROTATE_90_COUNTERCLOCKWISE);
+						cv::rotate(bev_flow, bev_flow, cv::ROTATE_180);
+						/* cv::flip(bev_flow, bev_flow, 1); */
+						bev_flow.convertTo(bev_flow, CV_8U, 255);
 
-					/* std::cout << "imshow" << std::endl; */
-					/* cv::namedWindow("bev_flow", CV_WINDOW_AUTOSIZE); */
-					/* cv::imshow("bev_flow", bev_flow); */
-					/* cv::waitKey(1); */
+						/* std::cout << "imshow" << std::endl; */
+						/* cv::namedWindow("bev_flow", CV_WINDOW_AUTOSIZE); */
+						/* cv::imshow("bev_flow", bev_flow); */
+						/* cv::waitKey(1); */
 
-					std::cout << "pub img" << std::endl;
-					cv::Mat flow_img;
-					bev_flow.copyTo(flow_img);
-					sensor_msgs::ImagePtr flow_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", flow_img).toImageMsg();
-					flow_img_msg->header.seq = bev_seq;
-					flow_image_publisher.publish(flow_img_msg);
-					step = 0;
-				
+						std::cout << "pub img" << std::endl;
+						cv::Mat flow_img;
+						bev_flow.copyTo(flow_img);
+						sensor_msgs::ImagePtr flow_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", flow_img).toImageMsg();
+						flow_img_msg->header.seq = bev_seq;
+						flow_image_publisher.publish(flow_img_msg);
+						step = 0;
+					
 
-					if(IS_SAVE_IMAGE){
-						std::vector<int> params(2);
-						// .png
-						const std::string folder_name = PKG_PATH + "/data_" + std::to_string(SAVE_NUMBER);
-						params[0] = CV_IMWRITE_PNG_COMPRESSION;
-						params[1] = 9;
+						if(IS_SAVE_IMAGE){
+							std::vector<int> params(2);
+							// .png
+							const std::string folder_name = PKG_PATH + "/data_" + std::to_string(SAVE_NUMBER);
+							params[0] = CV_IMWRITE_PNG_COMPRESSION;
+							params[1] = 9;
 
-						struct stat statBuf;
-						if(stat(folder_name.c_str(), &statBuf) == 0){
-							std::cout << "exist dir" << std::endl;
-						}else{
-							std::cout << "mkdir" << std::endl;
-							if(mkdir(folder_name.c_str(), 0755) != 0){
-								std::cout << "mkdir error" << std::endl;
+							struct stat statBuf;
+							if(stat(folder_name.c_str(), &statBuf) == 0){
+								std::cout << "exist dir" << std::endl;
+							}else{
+								std::cout << "mkdir" << std::endl;
+								if(mkdir(folder_name.c_str(), 0755) != 0){
+									std::cout << "mkdir error" << std::endl;
+								}
 							}
+							/* cv::imwrite("/home/amsl/ros_catkin_ws/src/bev_converter/bev_img/data_" + std::to_string(SAVE_NUMBER) + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params); */
+							cv::imwrite(folder_name + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params);
+							/* std::cout << "SAVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl; */
+							i++;
+						}else{
+							i = 0;
 						}
-						/* cv::imwrite("/home/amsl/ros_catkin_ws/src/bev_converter/bev_img/data_" + std::to_string(SAVE_NUMBER) + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params); */
-						cv::imwrite(folder_name + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params);
-						/* std::cout << "SAVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl; */
-						i++;
-					}else{
-						i = 0;
-					}
 
+						flow_img.release();
+					}
 					cropped_current_grid_img.release();
 					cropped_transformed_grid_img.release();
 					bev_flow.release();
-					flow_img.release();
 				}
 			}
 			
 			grid_callback_flag = false;
+			cmd_vel_callback_flag = false;
+			odom_callback_flag = false;
 			step++;
 			std::cout << "step : " << step << std::endl;
 			// pre_input_grid_img = input_grid_img;
@@ -178,9 +183,8 @@ void BEVFlowEstimator::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr& ms
 		if(step % STEP_BORDER == 0){
 			initializer();
 		}
-
-		cmd_vel_callback_flag = true;
 	}
+	cmd_vel_callback_flag = true;
 }
 
 
@@ -219,9 +223,8 @@ void BEVFlowEstimator::odom_callback(const nav_msgs::OdometryConstPtr &msg)
 				pre_yaw = current_yaw;
 			}
 		}
-
-		odom_callback_flag = true;
 	}
+	odom_callback_flag = true;
 }
 
 
@@ -249,7 +252,8 @@ void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 }
 
 
-cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
+// cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
+bool BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 {
 	std::cout << "flow_estimator" << std::endl;
 	flow_flag = false;
@@ -304,13 +308,18 @@ cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 			/* std::cout << "pear_corner_num:" << pear_corner_num << std::endl; */
 			/* for(size_t i = 0; i < pear_corner_num; i++){ */
 			/* 	std::cout << "i:" << i << std::endl; */
-				cv::Point flow_vector = cv::Point((cur_corners[i].x - pre_corners[i].x), -(cur_corners[i].y - pre_corners[i].y));
-				flow_x.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector.x;
-				flow_y.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector.y;
+				cv::Point2f flow_vector = cv::Point2f((cur_corners[i].x - pre_corners[i].x), -(cur_corners[i].y - pre_corners[i].y));
+				// memory bug zone---------------------------------------------------------------------
+				flow_x.at<float>((int)cur_corners[i].x, (int)cur_corners[i].y) = flow_vector.x;
+				flow_y.at<float>((int)cur_corners[i].x, (int)cur_corners[i].y) = flow_vector.y;
+				// memory bug zone-------------------------------------------------------------------------
 			}
+
 
 			cv::Mat magnitude, angle;
 			cv::cartToPolar(flow_x, flow_y, magnitude, angle, true);
+			flow_x.release();
+			flow_y.release();
 
 			std::cout << "cartToPolar" << std::endl;
 			cv::Mat hsv_planes[3];
@@ -319,7 +328,7 @@ cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 			/* cv::normalize(magnitude, magnitude, 1.0, 0.0, cv::NORM_L1); */
 			hsv_planes[1] = magnitude;
 			hsv_planes[2] = cv::Mat::ones(magnitude.size(), CV_32F);
-			
+
 			cv::Mat hsv;
 			std::cout << "cv::merge" << std::endl;
 			cv::merge(hsv_planes, 3, hsv);
@@ -342,9 +351,18 @@ cv::Mat BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 		}
 	}
 	
-	std::cout << "flow_bgr done" << std::endl;
+	bool flow_comp = false;
+	if(flow_bgr.size().width == img_size && flow_bgr.size().height == img_size){
+		bev_flow = flow_bgr.clone();
+		flow_comp = true;
+		std::cout << "flow_bgr done" << std::endl;
+	}else{
+		std::cout << "flow_bgr miss" << std::endl;
+	}
+	flow_bgr.release();
 
-    return flow_bgr;
+    /* return flow_bgr; */
+	return flow_comp;
 }
 
 
