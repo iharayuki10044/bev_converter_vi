@@ -62,10 +62,10 @@ void BEVFlowEstimator::executor(void)
 					/* cv::waitKey(1); */
 
 					// bev_flow = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
-					bool flow_comp = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
+					bool flow_comp_flag = flow_estimator(cropped_transformed_grid_img, cropped_current_grid_img);
 					std::cout << "flow comp!" << std::endl;
 
-					if(flow_comp){
+					if(flow_comp_flag){
 						// cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
 						// cv::rotate(bev_flow, bev_flow, cv::ROTATE_90_COUNTERCLOCKWISE);
 						cv::rotate(bev_flow, bev_flow, cv::ROTATE_180);
@@ -265,8 +265,8 @@ bool BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 
 	if(IS_DENSE){
 		cv::Ptr<cv::superres::DenseOpticalFlowExt> optical_flow = cv::superres::createOptFlow_DualTVL1();
-		std::cout << "pre_img.size() = " << pre_img.size() << std::endl;
-		std::cout << "cur_img.size() = " << cur_img.size() << std::endl;
+		/* std::cout << "pre_img.size() = " << pre_img.size() << std::endl; */
+		/* std::cout << "cur_img.size() = " << cur_img.size() << std::endl; */
 		optical_flow->calc(pre_img, cur_img, flow_x, flow_y);
 		cv::Mat magnitude, angle;
 		cv::cartToPolar(flow_x, flow_y, magnitude, angle, true);
@@ -287,10 +287,10 @@ bool BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 		std::vector<cv::Point2f> cur_corners;
 		cv::goodFeaturesToTrack(pre_img, pre_corners, MAX_CORNERS, QUALITY_LEVEL, MIN_DISTANCE);
 		cv::goodFeaturesToTrack(cur_img, cur_corners, MAX_CORNERS, QUALITY_LEVEL, MIN_DISTANCE);
-		std::cout << "pre_img.size() = " << pre_img.size() << std::endl;
-		std::cout << "cur_img.size() = " << cur_img.size() << std::endl;
-		std::cout << "pre_corners:" << pre_corners.size() << std::endl;
-		std::cout << "cur_corners:" << cur_corners.size() << std::endl;
+		/* std::cout << "pre_img.size() = " << pre_img.size() << std::endl; */
+		/* std::cout << "cur_img.size() = " << cur_img.size() << std::endl; */
+		/* std::cout << "pre_corners:" << pre_corners.size() << std::endl; */
+		/* std::cout << "cur_corners:" << cur_corners.size() << std::endl; */
 		if(pre_corners.size() > 0 && cur_corners.size() > 0){
 			cv::cornerSubPix(pre_img, pre_corners, cv::Size(WIN_SIZE, WIN_SIZE), cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::COUNT | cv::TermCriteria::EPS, MAX_COUNT, QUALITY_LEVEL));
 			cv::cornerSubPix(cur_img, cur_corners, cv::Size(WIN_SIZE, WIN_SIZE), cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::COUNT | cv::TermCriteria::EPS, MAX_COUNT, QUALITY_LEVEL));
@@ -300,12 +300,12 @@ bool BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 			size_t compare_features_num = 0;
 			if(pre_corners.size() > cur_corners.size()){
 				compare_features_num = cur_corners.size();
-				std::cout << "compare_features_num = " << compare_features_num << std::endl;
+				/* std::cout << "compare_features_num = " << compare_features_num << std::endl; */
 			}else if(pre_corners.size() <= cur_corners.size()){
 				compare_features_num = pre_corners.size();
-				std::cout << "compare_features_num = " << compare_features_num << std::endl;
+				/* std::cout << "compare_features_num = " << compare_features_num << std::endl; */
 			}else{
-				std::cout << "compare_features_num = " << compare_features_num << std::endl;
+				// std::cout << "compare_features_num = " << compare_features_num << std::endl;
 			}
 
 			cv::calcOpticalFlowPyrLK(pre_img, cur_img, pre_corners, cur_corners, features_found, features_errors);
@@ -314,7 +314,7 @@ bool BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 			/* for(size_t i = 0; i < features_found.size(); i++){ */
 			/* for(size_t i = 0; i < features_errors.size(); i++){ */
 			for(size_t i = 0; i < compare_features_num; i++){
-				std::cout << "corners[" << i << "]" << std::endl;
+				/* std::cout << "corners[" << i << "]" << std::endl; */
 				float flow_vector_x = (float)(cur_corners[i].x - pre_corners[i].x);
 				float flow_vector_y = -(float)(cur_corners[i].y - pre_corners[i].y);
 				if(cur_corners[i].x >= 0.0 && cur_corners[i].y >= 0.0){
@@ -322,8 +322,8 @@ bool BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 					/* flow_y.at<float>((int)cur_corners[i].x, (int)cur_corners[i].y) = flow_vector_y; */
 					flow_x.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector_x;
 					flow_y.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector_y;
-					std::cout << "pre_corners" << pre_corners[i] << std::endl;
-					std::cout << "cur_corners" << cur_corners[i] << std::endl;
+					/* std::cout << "pre_corners" << pre_corners[i] << std::endl; */
+					/* std::cout << "cur_corners" << cur_corners[i] << std::endl; */
 					/* std::cout << "flow_x(" << (int)cur_corners[i].x << ", " << (int)cur_corners[i].y << ")=\n" << flow_x << std::endl; */
 					/* std::cout << "flow_y(" << (int)cur_corners[i].x << ", " << (int)cur_corners[i].y << ")=\n" << flow_y << std::endl; */
 				}
@@ -333,8 +333,8 @@ bool BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 			std::cout << "calculated flow" << std::endl;
 
 			// cv::Mat magnitude, angle;
-			cv::Mat magnitude;
-			cv::Mat angle;
+			cv::Mat magnitude = cv::Mat::zeros(img_size, img_size, CV_32F);
+			cv::Mat angle = cv::Mat::zeros(img_size, img_size, CV_32F);
 			std::cout << "cartToPolar" << std::endl;
 			cv::cartToPolar(flow_x, flow_y, magnitude, angle, true);
 
@@ -349,9 +349,9 @@ bool BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 			hsv_planes[2] = cv::Mat::ones(magnitude.size(), CV_32F);
 
 			cv::Mat hsv;
-			std::cout << "cv::merge" << std::endl;
+			/* std::cout << "cv::merge" << std::endl; */
 			cv::merge(hsv_planes, 3, hsv);
-			std::cout << "cvtColor" << std::endl;
+			/* std::cout << "cvtColor" << std::endl; */
 			cv::cvtColor(hsv, flow_bgr, cv::COLOR_HSV2BGR);
 
 			/* magnitude.release(); */

@@ -83,7 +83,7 @@ void BEVImageGenerator::initializer(void)
 
 cv::Mat BEVImageGenerator::image_transformer(cv::Mat src_img)
 {
-	std::cout << "BEVImageGenerator::image_transformer" << std::endl;
+	/* std::cout << "BEVImageGenerator::image_transformer" << std::endl; */
 
 	float alpha = 1.0;
     pcl::transformPointCloud(src_euqlid_3pts, dst_euqlid_3pts, affine_transform);
@@ -98,14 +98,14 @@ cv::Mat BEVImageGenerator::image_transformer(cv::Mat src_img)
     cv::Mat dst_img;
     cv::warpAffine(src_img, dst_img, affine_matrix, src_img.size(), cv::INTER_LINEAR, cv::BORDER_TRANSPARENT);
 
-	std::cout << "src_pt" << std::endl;
-	for(int i = 0; i < 3; i++){
-		std::cout << src_pt[i] << std::endl;
-	}
-	std::cout << "dst_pt" << std::endl;
-	for(int i = 0; i < 3; i++){
-		std::cout << dst_pt[i] << std::endl;
-	}
+	/* std::cout << "src_pt" << std::endl; */
+	/* for(int i = 0; i < 3; i++){ */
+	/* 	std::cout << src_pt[i] << std::endl; */
+	/* } */
+	/* std::cout << "dst_pt" << std::endl; */
+	/* for(int i = 0; i < 3; i++){ */
+	/* 	std::cout << dst_pt[i] << std::endl; */
+	/* } */
     return dst_img;
 }
 
