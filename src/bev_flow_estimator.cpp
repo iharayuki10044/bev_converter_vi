@@ -83,7 +83,7 @@ void BEVFlowEstimator::executor(void)
 						sensor_msgs::ImagePtr flow_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", flow_img).toImageMsg();
 						flow_img_msg->header.seq = bev_seq;
 						flow_image_publisher.publish(flow_img_msg);
-						step = 0;
+						// step = 0;
 					
 
 						if(IS_SAVE_IMAGE){
@@ -110,11 +110,11 @@ void BEVFlowEstimator::executor(void)
 							i = 0;
 						}
 
-						flow_img.release();
+						// flow_img.release();
 					}
-					cropped_current_grid_img.release();
-					cropped_transformed_grid_img.release();
-					bev_flow.release();
+					// cropped_current_grid_img.release();
+					// cropped_transformed_grid_img.release();
+					// bev_flow.release();
 				}
 			}
 			
@@ -296,32 +296,51 @@ bool BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 			cv::cornerSubPix(cur_img, cur_corners, cv::Size(WIN_SIZE, WIN_SIZE), cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::COUNT | cv::TermCriteria::EPS, MAX_COUNT, QUALITY_LEVEL));
 			std::vector<uchar> features_found;
 			std::vector<float> features_errors;
-			cv::calcOpticalFlowPyrLK(pre_img, cur_img, pre_corners, cur_corners, features_found, features_errors);
 
-			for(size_t i = 0; i < features_found.size(); i++){
-			/* size_t pear_corner_num = 0; */
-			/* if(pre_corners.size() >= cur_corners.size()){ */
-			/* 	pear_corner_num = cur_corners.size(); */
-			/* }else{ */
-			/* 	pear_corner_num = pre_corners.size(); */
-			/* } */
-			/* std::cout << "pear_corner_num:" << pear_corner_num << std::endl; */
-			/* for(size_t i = 0; i < pear_corner_num; i++){ */
-			/* 	std::cout << "i:" << i << std::endl; */
-				cv::Point2f flow_vector = cv::Point2f((cur_corners[i].x - pre_corners[i].x), -(cur_corners[i].y - pre_corners[i].y));
-				// memory bug zone---------------------------------------------------------------------
-				flow_x.at<float>((int)cur_corners[i].x, (int)cur_corners[i].y) = flow_vector.x;
-				flow_y.at<float>((int)cur_corners[i].x, (int)cur_corners[i].y) = flow_vector.y;
-				// memory bug zone-------------------------------------------------------------------------
+			size_t compare_features_num = 0;
+			if(pre_corners.size() > cur_corners.size()){
+				compare_features_num = cur_corners.size();
+				std::cout << "compare_features_num = " << compare_features_num << std::endl;
+			}else if(pre_corners.size() <= cur_corners.size()){
+				compare_features_num = pre_corners.size();
+				std::cout << "compare_features_num = " << compare_features_num << std::endl;
+			}else{
+				std::cout << "compare_features_num = " << compare_features_num << std::endl;
 			}
 
+			cv::calcOpticalFlowPyrLK(pre_img, cur_img, pre_corners, cur_corners, features_found, features_errors);
 
-			cv::Mat magnitude, angle;
-			cv::cartToPolar(flow_x, flow_y, magnitude, angle, true);
-			flow_x.release();
-			flow_y.release();
+			// --memory bug zone---------------------------------------------------------------------
+			/* for(size_t i = 0; i < features_found.size(); i++){ */
+			/* for(size_t i = 0; i < features_errors.size(); i++){ */
+			for(size_t i = 0; i < compare_features_num; i++){
+				std::cout << "corners[" << i << "]" << std::endl;
+				float flow_vector_x = (float)(cur_corners[i].x - pre_corners[i].x);
+				float flow_vector_y = -(float)(cur_corners[i].y - pre_corners[i].y);
+				if(cur_corners[i].x >= 0.0 && cur_corners[i].y >= 0.0){
+					/* flow_x.at<float>((int)cur_corners[i].x, (int)cur_corners[i].y) = flow_vector_x; */
+					/* flow_y.at<float>((int)cur_corners[i].x, (int)cur_corners[i].y) = flow_vector_y; */
+					flow_x.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector_x;
+					flow_y.at<float>(cur_corners[i].x, cur_corners[i].y) = flow_vector_y;
+					std::cout << "pre_corners" << pre_corners[i] << std::endl;
+					std::cout << "cur_corners" << cur_corners[i] << std::endl;
+					/* std::cout << "flow_x(" << (int)cur_corners[i].x << ", " << (int)cur_corners[i].y << ")=\n" << flow_x << std::endl; */
+					/* std::cout << "flow_y(" << (int)cur_corners[i].x << ", " << (int)cur_corners[i].y << ")=\n" << flow_y << std::endl; */
+				}
+			}
+			// --memory bug zone-------------------------------------------------------------------------
 
+			std::cout << "calculated flow" << std::endl;
+
+			// cv::Mat magnitude, angle;
+			cv::Mat magnitude;
+			cv::Mat angle;
 			std::cout << "cartToPolar" << std::endl;
+			cv::cartToPolar(flow_x, flow_y, magnitude, angle, true);
+
+			// flow_x.release();
+			// flow_y.release();
+
 			cv::Mat hsv_planes[3];
 			hsv_planes[0] = angle;
 			cv::normalize(magnitude, magnitude, 0, 1, cv::NORM_MINMAX);
@@ -335,19 +354,19 @@ bool BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 			std::cout << "cvtColor" << std::endl;
 			cv::cvtColor(hsv, flow_bgr, cv::COLOR_HSV2BGR);
 
-			magnitude.release();
-			std::cout << "magnitude.release()" << std::endl;
-			angle.release();
-			std::cout << "angle.release()" << std::endl;
-			hsv_planes[0].release();
-			hsv_planes[1].release();
-			hsv_planes[2].release();
-			std::cout << "hsv_plane.release()" << std::endl;
-			hsv.release();
-			std::cout << "hsv.release()" << std::endl;
-			features_found.clear();
-			features_errors.clear();
-			std::cout << "features cleared" << std::endl;
+			/* magnitude.release(); */
+			/* std::cout << "magnitude.release()" << std::endl; */
+			/* angle.release(); */
+			/* std::cout << "angle.release()" << std::endl; */
+			/* hsv_planes[0].release(); */
+			/* hsv_planes[1].release(); */
+			/* hsv_planes[2].release(); */
+			/* std::cout << "hsv_plane.release()" << std::endl; */
+			/* hsv.release(); */
+			/* std::cout << "hsv.release()" << std::endl; */
+			/* features_found.clear(); */
+			/* features_errors.clear(); */
+			/* std::cout << "features cleared" << std::endl; */
 		}
 	}
 	
@@ -359,7 +378,7 @@ bool BEVFlowEstimator::flow_estimator(cv::Mat pre_img, cv::Mat cur_img)
 	}else{
 		std::cout << "flow_bgr miss" << std::endl;
 	}
-	flow_bgr.release();
+	// flow_bgr.release();
 
     /* return flow_bgr; */
 	return flow_comp;
