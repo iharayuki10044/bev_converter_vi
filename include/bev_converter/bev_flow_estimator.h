@@ -67,7 +67,7 @@ class BEVFlowEstimator
 		ros::Subscriber cmd_vel_subscriber;
 		// image_transport::Publisher flow_image_publisher;
 		ros::Publisher flow_image_publisher;
-		ros::Publisher bev_transformed_image_publisher;
+		ros::Publisher occupancy_image_publisher;
 		
         nav_msgs::OccupancyGrid bev_grid;
 		nav_msgs::Odometry odom;

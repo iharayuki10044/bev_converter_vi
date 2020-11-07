@@ -30,6 +30,7 @@ BEVFlowEstimator::BEVFlowEstimator(void)
 	cmd_vel_subscriber = nh.subscribe(CMD_VEL_TOPIC, 10, &BEVFlowEstimator::cmd_vel_callback, this);
 	odom_subscriber = nh.subscribe("/odom", 10, &BEVFlowEstimator::odom_callback, this);
 	flow_image_publisher = nh.advertise<sensor_msgs::Image>("/bev/flow_image", 10);
+	occupancy_image_publisher = nh.advertise<sensor_msgs::Image>("/bev/occupancy_image", 10);
 }
 
 
@@ -53,6 +54,13 @@ void BEVFlowEstimator::executor(void)
 					cropped_transformed_grid_img.convertTo(cropped_transformed_grid_img, CV_8U, 255);
 					cropped_current_grid_img.convertTo(cropped_current_grid_img, CV_8U, 255);
 					
+                    cv::rotate(cropped_current_grid_img, cropped_current_grid_img, cv::ROTATE_180);
+                    cv::Mat occupancy_img;
+                    cropped_current_grid_img.copyTo(occupancy_img);
+                    sensor_msgs::ImagePtr occupancy_img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", occupancy_img).toImageMsg();
+                    occupancy_img_msg->header.seq = bev_seq;
+                    occupancy_image_publisher.publish(occupancy_img_msg);
+
 					/* std::cout << "imshow" << std::endl; */
 					/* cv::namedWindow("cropped_transformed_grid_img", CV_WINDOW_AUTOSIZE); */
 					/* cv::imshow("cropped_transformed_grid_img", cropped_transformed_grid_img); */
@@ -80,7 +88,8 @@ void BEVFlowEstimator::executor(void)
 						std::cout << "pub img" << std::endl;
 						cv::Mat flow_img;
 						bev_flow.copyTo(flow_img);
-						sensor_msgs::ImagePtr flow_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", flow_img).toImageMsg();
+						// sensor_msgs::ImagePtr flow_img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", flow_img).toImageMsg();
+						sensor_msgs::ImagePtr flow_img_msg = cv_bridge::CvImage(std_msgs::Header(), "rgb8", flow_img).toImageMsg();
 						flow_img_msg->header.seq = bev_seq;
 						flow_image_publisher.publish(flow_img_msg);
 						// step = 0;
@@ -102,7 +111,6 @@ void BEVFlowEstimator::executor(void)
 									std::cout << "mkdir error" << std::endl;
 								}
 							}
-							/* cv::imwrite("/home/amsl/ros_catkin_ws/src/bev_converter/bev_img/data_" + std::to_string(SAVE_NUMBER) + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params); */
 							cv::imwrite(folder_name + "/" + "flow_" + std::to_string(i) + ".png", bev_flow, params);
 							/* std::cout << "SAVE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl; */
 							i++;
