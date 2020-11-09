@@ -65,14 +65,12 @@ class BEVFlowEstimator
         
 		ros::Subscriber dynamic_grid_subscriber;
 		ros::Subscriber occupancy_grid_subscriber;
-		ros::Subscriber pre_grid_image_subscriber;
 		ros::Subscriber odom_subscriber;
 		ros::Subscriber cmd_vel_subscriber;
 		// image_transport::Publisher flow_image_publisher;
 		ros::Publisher flow_image_publisher;
 		ros::Publisher occupancy_image_publisher;
 		
-        nav_msgs::OccupancyGrid bev_grid;
 		nav_msgs::Odometry odom;
 
         cv::Mat input_occupancy_grid_img;
