@@ -51,6 +51,7 @@ class BEVFlowEstimator
         bool IS_SAVE_IMAGE;
         bool IS_DENSE;
         bool IS_LOCAL;
+		bool IS_GAZEBO;
 		bool USE_CMD_VEL;
 		
 		std::string PKG_PATH, FRAME_ID, CHILD_FRAME_ID, CMD_VEL_TOPIC;

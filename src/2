@@ -259,7 +259,7 @@ void BEVFlowEstimator::occupancy_grid_callback(const nav_msgs::OccupancyGridCons
     for(unsigned int col = 0; col < occupancy_grid.info.height; col++){
         for(unsigned int row = 0; row < occupancy_grid.info.width; row++){
             unsigned int i = row + (occupancy_grid.info.height - col - 1) * occupancy_grid.info.width;
-            input_occupancy_grid_img.at<unsigned char>(col, row) = 255 - occupancy_grid.data[i];
+            input_occupancy_grid_img.at<unsigned char>(col, row) = occupancy_grid.data[i];
         }
     }
 
