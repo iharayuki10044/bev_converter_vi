@@ -8,8 +8,8 @@ BEVConverter::BEVConverter(void)
     nh.param("Hz", Hz, {100.0});
     nh.param("CHILD_FRAME_ID", CHILD_FRAME_ID, {"base_link"});
     // nh.param("");
-    
-    /* pc_subscriber = nh.subscribe("/velodyne_obstacles", 10, &BEVConverter::pc_callback, this); */
+
+    // pc_subscriber = nh.subscribe("/velodyne_obstacles", 10, &BEVConverter::pc_callback, this);
     pc_subscriber = nh.subscribe("/cloud/dynamic", 10, &BEVConverter::pc_callback, this);
     odom_subscriber = nh.subscribe("/odom", 10, &BEVConverter::odom_callback, this);
     bev_grid_publisher = nh.advertise<nav_msgs::OccupancyGrid>("/bev/grid", 10);
@@ -34,7 +34,7 @@ void BEVConverter::execution(void)
     		bev_grid.header.seq = pc_seq;
     		bev_grid.info.map_load_time = ros::Time::now();
     		bev_grid_publisher.publish(bev_grid);
-            
+
 			std::cout << bev_grid << std::endl;
 		}
 		tf_listen_flag = false;
