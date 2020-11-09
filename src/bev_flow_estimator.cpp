@@ -46,7 +46,7 @@ void BEVFlowEstimator::executor(void)
 	while(ros::ok()){
         bev_image_generator.initializer();
 
-		if((grid_callback_flag && cmd_vel_callback_flag) || (grid_callback_flag && odom_callback_flag)){
+		if((grid_callback_flag && occupancy_grid_callback_flag && cmd_vel_callback_flag) || (grid_callback_flag && occupancy_grid_callback_flag && odom_callback_flag)){
 			cv::Mat cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img); // evry time newest
 			cv::Mat cropped_occupancy_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_occupancy_grid_img); // evry time newest
 
