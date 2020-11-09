@@ -26,7 +26,8 @@ BEVFlowEstimator::BEVFlowEstimator(void)
     // nh.param("");
     nh.getParam("ROBOT_PARAM", ROBOT_PARAM);
 
-    grid_subscriber = nh.subscribe("/bev/grid", 10, &BEVFlowEstimator::grid_callback, this);
+    dynamic_grid_subscriber = nh.subscribe("/bev/grid", 10, &BEVFlowEstimator::dynamic_grid_callback, this);
+    occupancy_grid_subscriber = nh.subscribe("/occupancy_grid", 10, &BEVFlowEstimator::occupancy_grid_callback, this);
 	cmd_vel_subscriber = nh.subscribe(CMD_VEL_TOPIC, 10, &BEVFlowEstimator::cmd_vel_callback, this);
 	odom_subscriber = nh.subscribe("/odom", 10, &BEVFlowEstimator::odom_callback, this);
 	flow_image_publisher = nh.advertise<sensor_msgs::Image>("/bev/flow_image", 10);
@@ -47,6 +48,7 @@ void BEVFlowEstimator::executor(void)
 
 		if((grid_callback_flag && cmd_vel_callback_flag) || (grid_callback_flag && odom_callback_flag)){
 			cv::Mat cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img); // evry time newest
+			cv::Mat cropped_occupancy_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_occupancy_grid_img); // evry time newest
 
 			if(step % STEP_BORDER == STEP_BORDER - 1){
         		cv::Mat cropped_transformed_grid_img = bev_image_generator.cropped_transformed_grid_img_generator(pre_input_grid_img, current_position, current_yaw, pre_position, pre_yaw);
@@ -54,7 +56,7 @@ void BEVFlowEstimator::executor(void)
 					cropped_transformed_grid_img.convertTo(cropped_transformed_grid_img, CV_8U, 255);
 					cropped_current_grid_img.convertTo(cropped_current_grid_img, CV_8U, 255);
 					
-                    cv::rotate(cropped_current_grid_img, cropped_current_grid_img, cv::ROTATE_180);
+                    cv::rotate(cropped_occupancy_grid_img, cropped_occupancy_grid_img, cv::ROTATE_180);
                     cv::Mat occupancy_img;
                     cropped_current_grid_img.copyTo(occupancy_img);
                     sensor_msgs::ImagePtr occupancy_img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", occupancy_img).toImageMsg();
@@ -236,18 +238,39 @@ void BEVFlowEstimator::odom_callback(const nav_msgs::OdometryConstPtr &msg)
 }
 
 
-void BEVFlowEstimator::grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
+
+void BEVFlowEstimator::occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
 {
 	/* std::cout << "grid_callback" << std::endl; */
 
-	nav_msgs::OccupancyGrid bev_grid = *msg;
+	nav_msgs::OccupancyGrid occupancy_grid = *msg;
     bev_seq = bev_grid.header.seq;
+    
+    input_occupancy_grid_img = cv::Mat::zeros(cv::Size(occupancy_grid.info.width,bev_grid.info.height), CV_8UC1);
+
+    for(unsigned int col = 0; col < occupancy_grid.info.height; col++){
+        for(unsigned int row = 0; row < occupancy_grid.info.width; row++){
+            unsigned int i = row + (occupancy_grid.info.height - col - 1) * occupancy_grid.info.width;
+            input_occupancy_grid_img.at<unsigned char>(col, row) = occupancy_grid.data[i];
+        }
+    }
+
+	occupancy_grid_callback_flag = true;
+}
+
+
+void BEVFlowEstimator::dynamic_grid_callback(const nav_msgs::OccupancyGridConstPtr &msg)
+{
+	/* std::cout << "grid_callback" << std::endl; */
+
+	nav_msgs::OccupancyGrid dynamic_grid = *msg;
+    bev_seq = dynamic_grid.header.seq;
     
     input_grid_img = cv::Mat::zeros(cv::Size(bev_grid.info.width,bev_grid.info.height), CV_8UC1);
 
-    for(unsigned int col = 0; col < bev_grid.info.height; col++){
-        for(unsigned int row = 0; row < bev_grid.info.width; row++){
-            unsigned int i = row + (bev_grid.info.height - col - 1) * bev_grid.info.width;
+    for(unsigned int col = 0; col < dynamic_grid.info.height; col++){
+        for(unsigned int row = 0; row < dynamic_grid.info.width; row++){
+            unsigned int i = row + (dynamic_grid.info.height - col - 1) * dynamic_grid.info.width;
             input_grid_img.at<unsigned char>(col, row) = bev_grid.data[i];
         }
     }

@@ -32,7 +32,8 @@ class BEVFlowEstimator
 		void executor(void);
         void formatter(void);
         void initializer(void);
-		void grid_callback(const nav_msgs::OccupancyGridConstPtr&);
+		void occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr&);
+		void dynamic_grid_callback(const nav_msgs::OccupancyGridConstPtr&);
 		void pre_grid_image_callback(const sensor_msgs::ImageConstPtr&);
 		void cmd_vel_callback(const geometry_msgs::Twist::ConstPtr&);
 		void odom_callback(const nav_msgs::OdometryConstPtr&);
@@ -43,6 +44,7 @@ class BEVFlowEstimator
         XmlRpc::XmlRpcValue ROBOT_PARAM;
 
 		bool odom_callback_flag = false;
+		bool occupancy_grid_callback_flag = false;
 		bool grid_callback_flag = false;
 		bool cmd_vel_callback_flag = false;
 		bool flow_flag = false;
@@ -61,7 +63,8 @@ class BEVFlowEstimator
         ros::NodeHandle n;
         ros::NodeHandle nh;
         
-		ros::Subscriber grid_subscriber;
+		ros::Subscriber dynamic_grid_subscriber;
+		ros::Subscriber occupancy_grid_subscriber;
 		ros::Subscriber pre_grid_image_subscriber;
 		ros::Subscriber odom_subscriber;
 		ros::Subscriber cmd_vel_subscriber;
@@ -72,6 +75,7 @@ class BEVFlowEstimator
         nav_msgs::OccupancyGrid bev_grid;
 		nav_msgs::Odometry odom;
 
+        cv::Mat input_occupancy_grid_img;
         cv::Mat input_grid_img;
         cv::Mat pre_input_grid_img;
 		cv::Mat bev_flow;
