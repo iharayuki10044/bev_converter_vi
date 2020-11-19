@@ -174,6 +174,7 @@ add_executable(bev_converter src/bev_converter_node.cpp src/bev_converter.cpp)
 add_executable(bev_flow_estimator src/bev_flow_estimator_node.cpp src/bev_flow_estimator.cpp src/bev_image_generator.cpp)
 add_executable(pointcloud_converter src/pointcloud_converter.cpp)
 add_executable(odom_publisher src/pedsim/odom_publisher.cpp)
+add_executable(ground_truth_odom_publisher src/pedsim/ground_truth_odom_publisher.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -209,6 +210,10 @@ target_link_libraries(pointcloud_converter
 	${PCL_LIBRARIES}
 )
 target_link_libraries(odom_publisher
+	${catkin_LIBRARIES}
+	${PCL_LIBRARIES}
+)
+target_link_libraries(ground_truth_odom_publisher
 	${catkin_LIBRARIES}
 	${PCL_LIBRARIES}
 )
