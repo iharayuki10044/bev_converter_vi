@@ -2,6 +2,7 @@
 <launch>
     <arg name="range" default="5.0"/>
     <arg name="grid_num" default="50"/>
+    <arg name="flow_image_size" default="50"/>
     <arg name="hz" default="100.0"/>
     <arg name="crop" default="5"/>
     <arg name="max_corners" default="20"/>
