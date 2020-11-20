@@ -47,6 +47,7 @@
 		<param name="FRAME_ID" value="$(arg frame_id)" type="str"/>
 		<param name="CHILD_FRAME_ID" value="$(arg child_frame_id)" type="str"/>
         <!-- <rosparam command="load" file="$(find cats)/config/cats_motion_param.yaml"/> -->
+		<remap from="/odom" to="/ground_truth/odom"/>
 	</node>
 
     <arg name="width" default="5.0"/>
@@ -56,6 +57,7 @@
     <arg name="skip_scan_flag" default="false"/>
 
     <node pkg="dynamic_cloud_detector" type="dynamic_cloud_detector" name="dynamic_cloud_detector">
+		<remap from="/odom" to="/ground_truth/odom"/>
         <param name="WIDTH" value="$(arg width)"/>
         <param name="RESOLUTION" value="$(arg resolution)"/>
         <param name="OCCUPANCY_THRESHOLD" value="$(arg occupancy_threshold)"/>
