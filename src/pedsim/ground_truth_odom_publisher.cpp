@@ -29,7 +29,7 @@ GroundTruthOdomPublisher::GroundTruthOdomPublisher(void)
 	nh.param("GAZEBO_MSG_TOPIC", GAZEBO_MSG_TOPIC, {"/gazebo/model_states"});
 	nh.param("ODOM_TOPIC", ODOM_TOPIC, {"/ground_truth/odom"});
 	nh.param("FRAME_ID", FRAME_ID, {"odom"});
-	nh.param("CHILD_FRAME_ID", CHILD_FRAME_ID, {"base_footprint"});
+	nh.param("CHILD_FRAME_ID", CHILD_FRAME_ID, {"base_link"});
 	nh.param("MODEL_NAME", MODEL_NAME, {"turtlebot3_burger"});
 	
 	gazebo_msg_sub = nh.subscribe(GAZEBO_MSG_TOPIC, 10, &GroundTruthOdomPublisher::gazebo_msg_callback, this);
