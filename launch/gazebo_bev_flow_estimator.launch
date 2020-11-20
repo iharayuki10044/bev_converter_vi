@@ -27,6 +27,7 @@
 		<param name="GRID_NUM" value="$(arg grid_num)" type="int"/>
 		<param name="Hz" value="$(arg hz)" type="double"/>
 		<param name="CHILD_FRAME_ID" value="$(arg child_frame_id)" type="str"/>
+		<remap from="/odom" to="/ground_truth/odom"/>
 	</node>
 
 	<node pkg="bev_converter" type="bev_flow_estimator" name="bev_flow_estimator" output="screen">
