@@ -1,4 +1,9 @@
 #include <ros/ros.h>
+#include <tf/tf.h>
+#include <tf/transform_listener.h>
+#include <tf/transform_datatypes.h>
+#include <tf2/utils.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <nav_msgs/Odometry.h>
 #include "gazebo_msgs/ModelStates.h"
 
@@ -8,8 +13,6 @@ class GroundTruthOdomPublisher
 		GroundTruthOdomPublisher(void);
 
 		void gazebo_msg_callback(const gazebo_msgs::ModelStates::ConstPtr&);
-		void initializer(void);
-		void exe(void);
 
 	private:
 		std::string GAZEBO_MSG_TOPIC, ODOM_TOPIC, FRAME_ID, CHILD_FRAME_ID, MODEL_NAME;
