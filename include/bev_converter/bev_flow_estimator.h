@@ -34,7 +34,6 @@ class BEVFlowEstimator
         void initializer(void);
 		void occupancy_grid_callback(const nav_msgs::OccupancyGridConstPtr&);
 		void dynamic_grid_callback(const nav_msgs::OccupancyGridConstPtr&);
-		void pre_grid_image_callback(const sensor_msgs::ImageConstPtr&);
 		void cmd_vel_callback(const geometry_msgs::Twist::ConstPtr&);
 		void odom_callback(const nav_msgs::OdometryConstPtr&);
         // cv::Mat flow_estimator(cv::Mat, cv::Mat);
@@ -51,11 +50,12 @@ class BEVFlowEstimator
         bool IS_SAVE_IMAGE;
         bool IS_DENSE;
         bool IS_LOCAL;
+        bool IS_DRAW_FLOW_LINE;
 		bool IS_GAZEBO;
 		bool USE_CMD_VEL;
 		
 		std::string PKG_PATH, FRAME_ID, CHILD_FRAME_ID, CMD_VEL_TOPIC;
-        int GRID_NUM, SAVE_NUMBER, FLOW_IMAGE_SIZE, FLOW_WINiDOW_SIZE, MANUAL_CROP_SIZE, MAX_CORNERS, WIN_SIZE, MAX_COUNT, STEP_BORDER;
+        int GRID_NUM, SAVE_NUMBER, FLOW_IMAGE_SIZE, FLOW_WINiDOW_SIZE, MANUAL_CROP_SIZE, MAX_CORNERS, WIN_SIZE, MAX_COUNT, STEP_BORDER, THICKNESS;
 		int step, bev_seq;
         double RANGE, Hz, grid_size, dt, QUALITY_LEVEL, MIN_DISTANCE;
     	double run_length;
