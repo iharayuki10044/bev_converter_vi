@@ -33,6 +33,7 @@ BEVFlowEstimator::BEVFlowEstimator(void)
 	odom_subscriber = nh.subscribe("/odom", 10, &BEVFlowEstimator::odom_callback, this);
 	flow_image_publisher = nh.advertise<sensor_msgs::Image>("/bev/flow_image", 10);
 	occupancy_image_publisher = nh.advertise<sensor_msgs::Image>("/bev/occupancy_image", 10);
+	dynamic_image_publisher = nh.advertise<sensor_msgs::Image>("/bev/dynamic_image", 10);
 }
 
 
@@ -66,6 +67,16 @@ void BEVFlowEstimator::executor(void)
                     occupancy_img_msg->header.seq = bev_seq;
                     occupancy_image_publisher.publish(occupancy_img_msg);
 
+					
+
+                    cv::Mat dynamic_img;
+					cv::rotate(cropped_current_grid_img, dynamic_img, cv::ROTATE_90_COUNTERCLOCKWISE);
+                    sensor_msgs::ImagePtr dynamic_img_msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", dynamic_img).toImageMsg();
+                    dynamic_img_msg->header.seq = bev_seq;
+                    dynamic_image_publisher.publish(dynamic_img_msg);
+
+
+
 					/* std::cout << "imshow" << std::endl; */
 					/* cv::namedWindow("cropped_transformed_grid_img", CV_WINDOW_AUTOSIZE); */
 					/* cv::imshow("cropped_transformed_grid_img", cropped_transformed_grid_img); */
@@ -80,13 +91,13 @@ void BEVFlowEstimator::executor(void)
 
 					if(flow_comp_flag){
 							// cv::resize(bev_flow, bev_flow, cv::Size(FLOW_IMAGE_SIZE, FLOW_IMAGE_SIZE));
-						if(IS_GAZEBO){
+						// if(IS_GAZEBO){
 							cv::rotate(bev_flow, bev_flow, cv::ROTATE_90_COUNTERCLOCKWISE);
-						}else{
-							cv::rotate(bev_flow, bev_flow, cv::ROTATE_180);
+						// }else{
+						// 	cv::rotate(bev_flow, bev_flow, cv::ROTATE_180);
 							/* cv::rotate(bev_flow, bev_flow, cv::ROTATE_180); */
 							/* cv::flip(bev_flow, bev_flow, 1); */
-						}
+						// }
 						bev_flow.convertTo(bev_flow, CV_8U, 255);
 
 						/* std::cout << "imshow" << std::endl; */

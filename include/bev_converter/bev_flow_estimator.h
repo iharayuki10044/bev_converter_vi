@@ -71,6 +71,7 @@ class BEVFlowEstimator
 		// image_transport::Publisher flow_image_publisher;
 		ros::Publisher flow_image_publisher;
 		ros::Publisher occupancy_image_publisher;
+		ros::Publisher dynamic_image_publisher;
 		
 		nav_msgs::Odometry odom;
 
