@@ -26,6 +26,8 @@ void BEVConverter::execution(void)
 		std::cout << "initializer" << std::endl;
         initializer();
 
+        std::cout << "odom_call : " << odom_callback_flag << std::endl;
+        std::cout << "pc_call : " << pc_callback_flag << std::endl;
 		if(pc_callback_flag && odom_callback_flag){
 			std::cout << "converter" << std::endl;
             converter();

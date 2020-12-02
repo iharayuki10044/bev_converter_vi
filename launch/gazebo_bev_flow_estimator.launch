@@ -25,7 +25,7 @@
 	<!-- <node pkg="bev_converter" type="ground_truth_odom_publisher" name="ground_truth_odom_publisher"> -->
 	<!-- </node> -->
 
-	<node pkg="bev_converter" type="bev_converter" name="bev_converter">
+	<node pkg="bev_converter" type="bev_converter" name="bev_converter" output="screen">
 		<param name="RANGE" value="$(arg range)" type="double"/>
 		<param name="GRID_NUM" value="$(arg grid_num)" type="int"/>
 		<param name="Hz" value="$(arg hz)" type="double"/>
@@ -69,6 +69,7 @@
         <param name="OCCUPANCY_THRESHOLD" value="$(arg occupancy_threshold)"/>
         <param name="BEAM_NUM" value="$(arg beam_num)"/>
         <param name="SKIP_SCAN_FLAG" value="$(arg skip_scan_flag)"/>
+        <remap from="/odom/complement" to="/odom"/>
     </node>
 
 	<include file="$(find velodyne_height_map)/launch/amsl_velodyne_heightmap.launch"/>

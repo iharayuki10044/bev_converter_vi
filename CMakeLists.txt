@@ -159,6 +159,9 @@ add_library(libbev_converter
 add_library(libbev_flow_estimator
   src/bev_flow_estimator.cpp
 )
+add_library(libiheight_map
+    src/iheight_map.cpp
+)
 # add_library(libreboot_manager
 #   src/reboot_manager.cpp
 # )
@@ -169,6 +172,7 @@ add_library(libbev_flow_estimator
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(libbev_converter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(libbev_flow_estimator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(libiheight_map ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 # add_dependencies(libreboot_manager ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
@@ -180,6 +184,7 @@ add_executable(bev_flow_estimator src/bev_flow_estimator_node.cpp src/bev_flow_e
 add_executable(pointcloud_converter src/pointcloud_converter.cpp)
 add_executable(odom_publisher src/pedsim/odom_publisher.cpp)
 add_executable(ground_truth_odom_publisher src/pedsim/ground_truth_odom_publisher.cpp)
+add_executable(iheight_map src/iheight_map.cpp src/iheight_map_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -192,6 +197,7 @@ add_executable(ground_truth_odom_publisher src/pedsim/ground_truth_odom_publishe
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(bev_converter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(bev_flow_estimator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(iheight_map ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 # add_dependencies(reboot_manager ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
@@ -226,6 +232,11 @@ target_link_libraries(odom_publisher
 target_link_libraries(ground_truth_odom_publisher
 	${catkin_LIBRARIES}
 	${PCL_LIBRARIES}
+)
+
+target_link_libraries(iheight_map
+    ${catkin_LIBRARIES}
+    ${PCL_LIBRARIES}
 )
 #############
 ## Install ##

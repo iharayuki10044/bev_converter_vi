@@ -48,6 +48,11 @@ void BEVFlowEstimator::executor(void)
 	while(ros::ok()){
         bev_image_generator.initializer();
 
+
+        std::cout << "grid_callback_flag : " << grid_callback_flag <<std::endl;
+        std::cout << "occupancy_grid_callback_flag : " << occupancy_grid_callback_flag << std::endl;
+        std::cout << "cmd_vel_callback_flag : " << cmd_vel_callback_flag << std::endl;
+        std::cout << "odom_call_back_flag : " << odom_callback_flag << std::endl;
 		if((grid_callback_flag && occupancy_grid_callback_flag && cmd_vel_callback_flag) || (grid_callback_flag && occupancy_grid_callback_flag && odom_callback_flag)){
 			cv::Mat cropped_current_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_grid_img); // evry time newest
 			cv::Mat cropped_occupancy_grid_img = bev_image_generator.cropped_current_grid_img_generator(input_occupancy_grid_img); // evry time newest
