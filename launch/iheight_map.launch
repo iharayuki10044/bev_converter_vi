@@ -1,0 +1,9 @@
+<launch>
+    <arg name="hz" default="10"/>
+    <arg name="height_threshold" default="0.25"/>
+	
+	<node pkg="bev_converter" type="iheight_map" name="iheight_map" output="screen">
+		<param name="Hz" value="$(arg hz)" type="int"/>
+        <param name="HEIGHT_THRESHOLD" value="$(arg height_threshold)" type="double"/>
+	</node>
+</launch>

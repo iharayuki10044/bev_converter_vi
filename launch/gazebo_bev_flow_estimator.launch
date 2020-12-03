@@ -16,7 +16,7 @@
     <arg name="is_draw_flow_line" default="false"/>
     <arg name="save_data_num" default="1"/>
     <arg name="frame_id" default="odom"/>
-    <arg name="child_frame_id" default="base_link"/>
+    <arg name="child_frame_id" default="base_footprint"/>
     <arg name="step_border" default="2"/>
     <arg name="thickness" default="2"/>
 
@@ -72,6 +72,6 @@
         <remap from="/odom/complement" to="/odom"/>
     </node>
 
-	<include file="$(find velodyne_height_map)/launch/amsl_velodyne_heightmap.launch"/>
-	<include file="$(find velodyne_pointcloud)/launch/32e_points.launch"/>
+	<!-- <include file="$(find velodyne_height_map)/launch/amsl_velodyne_heightmap.launch"/> -->
+	<!-- <include file="$(find velodyne_pointcloud)/launch/32e_points.launch"/> -->
 </launch>

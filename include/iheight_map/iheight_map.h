@@ -38,7 +38,7 @@ class IheightMap
         bool pc_callback_flag;
 
         int Hz;
-        double MIN_HEIGHT;
+        double HEIGHT_THRESHOLD;
 
         ros::NodeHandle nh;
         ros::Subscriber pc_subscriber;
